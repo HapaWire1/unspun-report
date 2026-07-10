@@ -699,13 +699,38 @@
             await supabase.auth.signOut();
         }
 
-        async function decrementCredit() {
+        // Atomically checks-and-spends one credit on the server before any parsing runs.
+        // Never trust currentCredits for gating — it's a display cache, not the source of truth.
+        async function consumeCreditServerSide() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) return { allowed: false, error: 'Not signed in' };
+            const res = await fetch('/api/consume-credit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ access_token: session.access_token })
+            });
+            const result = await res.json();
+            if (result.allowed && result.remaining != null) {
+                currentCredits = result.remaining;
+                document.getElementById('nav-credits').textContent = currentCredits === -1 ? '∞ audits' : currentCredits + (currentCredits === 1 ? ' audit' : ' audits');
+            }
+            return result;
+        }
+
+        async function logAuditEvent() {
             if (!currentUser) return;
             await supabase.from('audits').insert({ user_id: currentUser.id });
-            if (currentCredits === -1) return; // unlimited — don't decrement
-            currentCredits = Math.max(0, currentCredits - 1);
-            await supabase.from('profiles').update({ audit_credits: currentCredits }).eq('id', currentUser.id);
-            document.getElementById('nav-credits').textContent = currentCredits + (currentCredits === 1 ? ' audit' : ' audits');
+            await supabase.from('audit_metrics').insert({
+                user_id: currentUser.id,
+                agency_fee: data.agencyFee,
+                ad_spend: data.adSpend,
+                impressions: data.impressions,
+                clicks: data.clicks,
+                conversions: data.conversions,
+                cpc: data.cpc,
+                cost_per_conversion: data.costPerConversion,
+                blended_cost_per_conversion: window._blended ?? null
+            });
         }
 
         // ── pdf.js ─────────────────────────────────────────────────────────────
@@ -762,8 +787,19 @@
             document.getElementById('manual-fee-row').style.display = (hasAdData && !hasAgencyFee) ? 'block' : 'none';
 
             if (hasAdData) {
+                // Credit is checked-and-spent atomically on the server at the moment of reveal —
+                // not before parsing (a failed/empty parse should never cost a credit) and not
+                // client-side only (that was the bypassable version of this gate).
+                setStatus('Verifying your audit balance…', '');
+                const credit = await consumeCreditServerSide();
+                if (!credit.allowed) {
+                    document.getElementById('tool-inner').style.display = 'none';
+                    document.getElementById('no-credits-gate').style.display = 'block';
+                    setStatus('', '');
+                    return;
+                }
                 displayReport();
-                await decrementCredit();
+                await logAuditEvent();
                 setStatus('Files processed successfully.', 'success');
             } else {
                 setStatus('Could not find Google Ads data. Make sure you uploaded the monthly marketing report PDF or a Google Ads CSV export.', 'error');
