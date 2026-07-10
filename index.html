@@ -332,14 +332,44 @@
             border-top: 1px solid var(--border);
             border-bottom: 1px solid var(--border);
         }
+        .pricing-grid {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: stretch;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
         .pricing-card {
-            max-width: 420px;
-            margin: 40px auto 0;
+            flex: 1 1 280px;
+            max-width: 320px;
+            position: relative;
             background: var(--bg);
-            border: 1px solid var(--teal);
+            border: 1px solid var(--border);
             border-radius: 14px;
-            padding: 36px;
+            padding: 36px 28px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+        }
+        .pricing-card.featured {
+            border: 1px solid var(--teal);
+            transform: translateY(-6px);
+        }
+        .pricing-badge {
+            position: absolute;
+            top: -13px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--teal);
+            color: #000;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
         }
         .pricing-card .price {
             font-size: 52px;
@@ -354,6 +384,7 @@
             margin: 8px 0 28px;
         }
         .pricing-features {
+            flex-grow: 1;
             list-style: none;
             text-align: left;
             margin-bottom: 28px;
@@ -411,6 +442,7 @@
         .no-credits-gate { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 40px 30px; text-align: center; }
         .no-credits-gate h3 { font-size: 20px; color: #fff; margin-bottom: 10px; }
         .no-credits-gate p { color: var(--muted); margin-bottom: 24px; }
+        .gate-pack-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
         @media (max-width: 600px) {
             nav { padding: 16px 20px; }
@@ -531,8 +563,12 @@
         <!-- Signed in, no credits -->
         <div class="no-credits-gate" id="no-credits-gate" style="display:none">
             <h3>You're out of audits</h3>
-            <p>Get 3 more for a one-time payment of $12.99 — no subscription.</p>
-            <a id="buy-more-btn" href="https://buy.stripe.com/test_aFa4gy7Ys4WH4twagXaEE00" class="primary" style="display:inline-block; text-align:center; text-decoration:none; width:auto; padding:13px 28px;">Get 3 Audits — $12.99</a>
+            <p>Pick a pack to keep going — no subscription, no expiry.</p>
+            <div class="gate-pack-row">
+                <a href="https://buy.stripe.com/PLACEHOLDER_3PACK" class="primary" style="display:inline-block; text-align:center; text-decoration:none; width:auto; padding:13px 22px;">3 for $79</a>
+                <a href="https://buy.stripe.com/PLACEHOLDER_6PACK" class="primary" style="display:inline-block; text-align:center; text-decoration:none; width:auto; padding:13px 22px;">6 for $139</a>
+                <a href="https://buy.stripe.com/PLACEHOLDER_9PACK" class="primary" style="display:inline-block; text-align:center; text-decoration:none; width:auto; padding:13px 22px;">9 for $179</a>
+            </div>
         </div>
 
         <div id="report" style="display:none">
@@ -588,20 +624,43 @@
         <section class="section" style="text-align:center;">
             <p class="section-label">Pricing</p>
             <h2>Simple. No subscription.</h2>
-            <p style="margin: 0 auto; max-width: 500px;">Pay once, run three audits. Use them all at once or spread them over time — no expiry, no auto-renew.</p>
-            <div class="pricing-card">
-                <div class="price"><sup>$</sup>12.99</div>
-                <div class="price-desc">3 audits · one-time payment · no subscription</div>
-                <ul class="pricing-features">
-                    <li>Upload PDF or CSV reports</li>
-                    <li>Full spend breakdown</li>
-                    <li>Profit / Loss calculator</li>
-                    <li>Plain-English glossary</li>
-                    <li>Shareable results link</li>
-                </ul>
-                <a href="https://buy.stripe.com/test_aFa4gy7Ys4WH4twagXaEE00" class="primary" style="display:block; text-align:center; text-decoration:none;">Get 3 Audits — $12.99</a>
-                <p style="font-size:13px; color:var(--muted); margin-top:14px;">First audit is always free. No card required.</p>
+            <p style="margin: 0 auto; max-width: 500px;">Pay once, use the audits whenever you need them — no expiry, no auto-renew.</p>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="price"><sup>$</sup>79</div>
+                    <div class="price-desc">3 audits · $26.33 each</div>
+                    <ul class="pricing-features">
+                        <li>Upload PDF or CSV reports</li>
+                        <li>Full spend breakdown</li>
+                        <li>Profit / Loss calculator</li>
+                        <li>Plain-English glossary</li>
+                        <li>Shareable results link</li>
+                    </ul>
+                    <a data-pack="3" href="https://buy.stripe.com/PLACEHOLDER_3PACK" class="primary" style="display:block; text-align:center; text-decoration:none;">Get 3 Audits — $79</a>
+                </div>
+                <div class="pricing-card featured">
+                    <div class="pricing-badge">Most popular</div>
+                    <div class="price"><sup>$</sup>139</div>
+                    <div class="price-desc">6 audits · $23.17 each</div>
+                    <ul class="pricing-features">
+                        <li>Everything in the 3-pack</li>
+                        <li>Best per-audit rate for one business</li>
+                        <li>Enough to compare multiple agency quotes</li>
+                    </ul>
+                    <a data-pack="6" href="https://buy.stripe.com/PLACEHOLDER_6PACK" class="primary" style="display:block; text-align:center; text-decoration:none;">Get 6 Audits — $139</a>
+                </div>
+                <div class="pricing-card">
+                    <div class="price"><sup>$</sup>179</div>
+                    <div class="price-desc">9 audits · $19.89 each</div>
+                    <ul class="pricing-features">
+                        <li>Everything in the 6-pack</li>
+                        <li>Lowest per-audit rate</li>
+                        <li>Multiple locations or ongoing check-ins</li>
+                    </ul>
+                    <a data-pack="9" href="https://buy.stripe.com/PLACEHOLDER_9PACK" class="primary" style="display:block; text-align:center; text-decoration:none;">Get 9 Audits — $179</a>
+                </div>
             </div>
+            <p style="font-size:13px; color:var(--muted); margin-top:24px;">First audit is always free. No card required.</p>
         </section>
     </div>
 

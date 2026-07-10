@@ -32,6 +32,15 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Payment not completed' });
   }
 
+  // Three packs, each granting a different number of credits: 3/$79, 6/$139, 9/$179.
+  // Map by the actual amount charged rather than assuming one fixed amount — this is
+  // what has to change if any of these prices ever change in Stripe.
+  const CREDITS_BY_AMOUNT_CENTS = { 7900: 3, 13900: 6, 17900: 9 };
+  const creditsToAdd = CREDITS_BY_AMOUNT_CENTS[session.amount_total];
+  if (!creditsToAdd) {
+    return res.status(400).json({ error: `Unrecognized payment amount: ${session.amount_total}` });
+  }
+
   // 3. Idempotency — don't credit twice for the same session
   const existingRes = await fetch(
     `${SUPABASE_URL}/rest/v1/purchases?stripe_session_id=eq.${encodeURIComponent(session_id)}&select=id`,
@@ -51,10 +60,10 @@ export default async function handler(req, res) {
       'Content-Type': 'application/json',
       Prefer: 'return=minimal'
     },
-    body: JSON.stringify({ user_id: user.id, stripe_session_id: session_id, credits_added: 3 })
+    body: JSON.stringify({ user_id: user.id, stripe_session_id: session_id, credits_added: creditsToAdd })
   });
 
-  // 5. Atomically add 3 credits
+  // 5. Atomically add the credits this pack is worth
   const rpcRes = await fetch(`${SUPABASE_URL}/rest/v1/rpc/increment_credits`, {
     method: 'POST',
     headers: {
@@ -62,7 +71,7 @@ export default async function handler(req, res) {
       apikey: SUPABASE_SERVICE_KEY,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ user_id: user.id, amount: 3 })
+    body: JSON.stringify({ user_id: user.id, amount: creditsToAdd })
   });
 
   if (!rpcRes.ok) {
@@ -70,5 +79,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to add credits', detail: err });
   }
 
-  return res.status(200).json({ credits_added: 3 });
+  return res.status(200).json({ credits_added: creditsToAdd });
 }

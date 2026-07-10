@@ -34,7 +34,7 @@
     <div class="card">
       <div class="icon">✓</div>
       <h1>Payment successful</h1>
-      <p>Your 3 audits are being added to your account now.</p>
+      <p>Your audits are being added to your account now.</p>
       <div class="credits-badge" id="credits-badge">Adding credits…</div>
       <br>
       <a href="/" class="btn">Run an Audit</a>
@@ -77,7 +77,8 @@
         if (result.already_processed) {
           document.getElementById('credits-badge').textContent = 'Credits already applied ✓';
         } else if (result.credits_added) {
-          document.getElementById('credits-badge').textContent = '+3 audits added to your account ✓';
+          const n = result.credits_added;
+          document.getElementById('credits-badge').textContent = `+${n} audit${n === 1 ? '' : 's'} added to your account ✓`;
         } else {
           throw new Error(result.error || 'Unknown error');
         }
