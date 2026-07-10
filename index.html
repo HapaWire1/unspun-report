@@ -540,13 +540,13 @@
             <div class="box">
                 <h2>Your Marketing Spend Breakdown</h2>
                 <p><strong>Agency Fee</strong>: $<span id="r-agency-fee">—</span></p>
-                <p><strong>Actual Google Ad Spend</strong>: $<span id="r-ad-spend">—</span></p>
+                <p><strong>Actual <span id="lbl-platform-1">Google</span> Ad Spend</strong>: $<span id="r-ad-spend">—</span></p>
                 <p><strong style="color:var(--red)">Total Cost This Month</strong>: <span class="highlight">$<span id="r-total">—</span></span></p>
             </div>
 
             <div class="box">
                 <h2>What You Got This Month</h2>
-                <p><strong>Impressions</strong>: <span id="r-impressions">—</span> → Your ad was shown that many times on Google</p>
+                <p><strong>Impressions</strong>: <span id="r-impressions">—</span> → Your ad was shown that many times on <span id="lbl-platform-2">Google</span></p>
                 <p><strong>Clicks</strong>: <span id="r-clicks">—</span> at <strong>$<span id="r-cpc">—</span></strong> each = <strong>$<span id="r-ad-spend-2">—</span></strong> total ad spend</p>
                 <p><strong>Click-Through Rate (CTR)</strong>: <span id="r-ctr">—</span> → <span id="r-ctr-label">—</span></p>
                 <p><strong>Conversions</strong>: <span id="r-conversions">—</span> at <strong>$<span id="r-cost-per-conv">—</span></strong> ad-only cost each</p>
@@ -568,9 +568,9 @@
                 <table>
                     <tr><th class="term">Term</th><th>Simple Meaning</th></tr>
                     <tr><td class="term">Agency Fee</td><td>Money you pay the marketing company for managing your ads.</td></tr>
-                    <tr><td class="term">Actual Ad Spend</td><td>Real dollars Google charged for showing your ads.</td></tr>
-                    <tr><td class="term">Impressions</td><td>How many times your ad appeared on Google (even if no one clicked).</td></tr>
-                    <tr><td class="term">CPC (Cost Per Click)</td><td>How much you paid Google every single time someone clicked your ad.</td></tr>
+                    <tr><td class="term">Actual Ad Spend</td><td>Real dollars <span id="lbl-platform-3">Google</span> charged for showing your ads.</td></tr>
+                    <tr><td class="term">Impressions</td><td>How many times your ad appeared on <span id="lbl-platform-4">Google</span> (even if no one clicked).</td></tr>
+                    <tr><td class="term">CPC (Cost Per Click)</td><td>How much you paid <span id="lbl-platform-5">Google</span> every single time someone clicked your ad.</td></tr>
                     <tr><td class="term">Clicks</td><td>How many people actually clicked your ad.</td></tr>
                     <tr><td class="term">Conversions</td><td>How many people took action (called, filled a form, booked, etc.).</td></tr>
                     <tr><td class="term">CTR (Click-Through Rate)</td><td>The % of people who saw your ad and clicked it. Higher = more compelling ad.</td></tr>
@@ -738,7 +738,8 @@
 
         const data = {
             agencyFee: null, adSpend: null, impressions: null,
-            clicks: null, cpc: null, conversions: null, costPerConversion: null
+            clicks: null, cpc: null, conversions: null, costPerConversion: null,
+            platform: null // 'google' | 'meta' — drives which platform's wording the report uses
         };
 
         const dropZone = document.getElementById('drop-zone');
@@ -834,17 +835,30 @@
             ).join('\n');
         }
 
-        function looksLikeInvoice(text) { return /RECEIPT|INVOICE/i.test(text) && /TOTAL/i.test(text); }
+        function looksLikeInvoice(text) { return /RECEIPT|INVOICE|STATEMENT|BILL/i.test(text) && /TOTAL|AMOUNT DUE|BALANCE DUE/i.test(text); }
         function looksLikeReport(text) { return /Google Ads/i.test(text) && /Impressions/i.test(text) && /Conversions/i.test(text); }
 
+        // Tries each common "how much do I owe" label in turn — agencies phrase this differently
+        // (TOTAL, AMOUNT DUE, BALANCE DUE, GRAND TOTAL) and the original single-pattern match
+        // only ever caught the first one, silently failing on the others.
         function parseInvoiceText(text) {
-            const m = text.match(/TOTAL\s+\$?([\d,]+\.?\d*)/i);
-            if (m) data.agencyFee = parseNum(m[1]);
+            const patterns = [
+                /TOTAL\s+DUE\s+\$?([\d,]+\.?\d*)/i,
+                /AMOUNT\s+DUE\s+\$?([\d,]+\.?\d*)/i,
+                /BALANCE\s+DUE\s+\$?([\d,]+\.?\d*)/i,
+                /GRAND\s+TOTAL\s+\$?([\d,]+\.?\d*)/i,
+                /TOTAL\s+\$?([\d,]+\.?\d*)/i
+            ];
+            for (const p of patterns) {
+                const m = text.match(p);
+                if (m) { data.agencyFee = parseNum(m[1]); return; }
+            }
         }
 
         function parseReportText(pages) {
             for (const pageText of pages) {
                 if (!/Google Ads.*Campaigns?/i.test(pageText)) continue;
+                data.platform = 'google';
                 const m = pageText.match(
                     /Avg\.?\s*CPC\s+Clicks\s+Conversions?\s+Cost\s+Cost\s*\/\s*Conversion\s+Impressions\s+\$([\d.]+)\s+([\d,]+)\s+([\d.]+)\s+\$([\d,]+(?:\.\d+)?)\s+\$([\d,]+(?:\.\d+)?)\s+([\d,]+)/i
                 );
@@ -872,6 +886,10 @@
             }
         }
 
+        // Handles both Google Ads and Meta (Facebook/Instagram) Ads Manager CSV exports.
+        // The two platforms name the same underlying numbers differently — Google says
+        // "Cost", Meta says "Amount spent"; Google says "Conversions", Meta says "Results" —
+        // so column detection tries both vocabularies rather than assuming Google's.
         function parseCSV(text) {
             const lines = text.trim().split(/\r?\n/);
             let headerIdx = -1;
@@ -881,9 +899,25 @@
             if (headerIdx < 0) throw new Error('No recognizable column headers found in CSV');
             const headers = parseCSVRow(lines[headerIdx]).map(h => h.toLowerCase().trim());
             const col = name => headers.findIndex(h => h.includes(name));
-            const iClicks = col('click'), iImpr = col('impression'), iCost = col('cost');
-            const iConv = col('conv'), iCpc = col('cpc') >= 0 ? col('cpc') : col('avg. cpc');
-            const iCostConv = headers.findIndex(h => h.includes('cost') && h.includes('conv'));
+            const isMeta = col('amount spent') >= 0 || col('link click') >= 0 || headers.some(h => h.includes('reach'));
+            data.platform = isMeta ? 'meta' : 'google';
+
+            const iImpr = col('impression');
+            // "click" alone also matches "CTR (link click-through rate)" — exclude rate/CTR
+            // columns so a percentage doesn't get read in as a click count.
+            const iClicks = headers.findIndex(h => h.includes('click') && !h.includes('ctr') && !h.includes('rate') && !h.includes('through'));
+            // The per-unit "cost per result/conversion" column also contains "cost", so it
+            // must be found and excluded before falling back to a generic "cost" match —
+            // otherwise the per-unit figure gets read in as the total spend.
+            const iCostConv = headers.findIndex(h => (h.includes('cost') || h.includes('amount')) && (h.includes('conv') || h.includes('result')));
+            const iCost = col('amount spent') >= 0 ? col('amount spent')
+                : headers.findIndex((h, idx) => h.includes('cost') && idx !== iCostConv) >= 0 ? headers.findIndex((h, idx) => h.includes('cost') && idx !== iCostConv)
+                : col('spend');
+            // Same per-unit trap for conversions: "Result indicator" is a category label, not
+            // a count, and "Cost per result" already matched above — exclude both.
+            const iConv = col('conv') >= 0 ? col('conv')
+                : headers.findIndex(h => h.includes('result') && !h.includes('indicator') && !h.includes('cost') && !h.includes('per'));
+            const iCpc = col('cpc') >= 0 ? col('cpc') : col('avg. cpc');
             let totalsRow = null;
             for (let i = headerIdx + 1; i < lines.length; i++) {
                 const row = parseCSVRow(lines[i]);
@@ -893,7 +927,11 @@
             if (!totalsRow) throw new Error('No data rows found in CSV');
             if (iClicks >= 0) data.clicks = parseNum(totalsRow[iClicks]);
             if (iImpr >= 0) data.impressions = parseNum(totalsRow[iImpr]);
-            if (iCost >= 0 && iCostConv < 0) data.adSpend = parseNum(totalsRow[iCost]);
+            // Pre-existing bug: this used to skip reading total spend whenever a separate
+            // cost-per-conversion column also existed, as if the two were mutually exclusive.
+            // Most real exports have both — total Cost and Cost/conv. side by side — so this
+            // silently zeroed out ad spend on exactly the common case.
+            if (iCost >= 0) data.adSpend = parseNum(totalsRow[iCost]);
             if (iConv >= 0) data.conversions = parseNum(totalsRow[iConv]);
             if (iCpc >= 0) data.cpc = parseNum(totalsRow[iCpc]);
             if (iCostConv >= 0) data.costPerConversion = parseNum(totalsRow[iCostConv]);
@@ -917,7 +955,19 @@
             if (!isNaN(val) && val > 0) { data.agencyFee = val; displayReport(); }
         }
 
+        // The report's copy hardcodes "Google" in a few spots that are only true for Google
+        // Ads data — swap them to "Meta" when a Meta/Facebook export was detected, so a Meta
+        // report doesn't tell someone Google charged them for it.
+        function applyPlatformLabels() {
+            const label = data.platform === 'meta' ? 'Meta' : 'Google';
+            ['lbl-platform-1', 'lbl-platform-2', 'lbl-platform-3', 'lbl-platform-4', 'lbl-platform-5'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = label;
+            });
+        }
+
         function displayReport() {
+            applyPlatformLabels();
             const fee = data.agencyFee, spend = data.adSpend;
             const total = (fee != null && spend != null) ? fee + spend : spend;
             const blended = (total != null && data.conversions) ? total / data.conversions : (data.costPerConversion || null);
