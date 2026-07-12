@@ -499,6 +499,10 @@
                 <p class="quote">"I asked them to explain the report and they sent me a longer, more confusing email."</p>
                 <p class="attribution">— Boutique owner, 18 months into an ad contract</p>
             </div>
+            <div class="pain-card">
+                <p class="quote">"Our Facebook ads report is just a screenshot of some graphs going up. I have no idea what any of it means for my bottom line."</p>
+                <p class="attribution">— Salon owner, running Meta ads</p>
+            </div>
         </div>
     </section>
 
@@ -511,7 +515,7 @@
                 <div class="step">
                     <div class="step-num">01</div>
                     <h3>Upload your reports</h3>
-                    <p>Drop in your agency invoice and your monthly Google Ads report. PDF or CSV — both work.</p>
+                    <p>Drop in your agency invoice and your monthly Google Ads or Meta Ads report. PDF or CSV — both work.</p>
                 </div>
                 <div class="step">
                     <div class="step-num">02</div>
@@ -670,7 +674,7 @@
         <p class="section-label">Referral program</p>
         <h2>Know another business owner in the dark?</h2>
         <p style="margin: 0 auto 32px;">Send them your referral link. When they run their first paid audit, you get <strong style="color:var(--teal)">$10 credit</strong> toward your next pack. They get <strong style="color:var(--teal)">$5 off</strong> theirs.</p>
-        <button class="primary" style="max-width:320px; margin:0 auto;" onclick="alert('Referral link generated!\n\nhttps://unspun.report/ref/YOURCODE123\n\nShare this with other small business owners running Google Ads.')">Generate My Referral Link</button>
+        <button class="primary" style="max-width:320px; margin:0 auto;" onclick="alert('Referral link generated!\n\nhttps://unspun.report/ref/YOURCODE123\n\nShare this with other small business owners running Google or Meta ads.')">Generate My Referral Link</button>
     </section>
 
     <!-- FOOTER -->
@@ -863,7 +867,7 @@
                 await logAuditEvent();
                 setStatus('Files processed successfully.', 'success');
             } else {
-                setStatus('Could not find Google Ads data. Make sure you uploaded the monthly marketing report PDF or a Google Ads CSV export.', 'error');
+                setStatus('Could not find ad performance data. Make sure you uploaded the monthly marketing report PDF or a Google Ads / Meta Ads CSV export.', 'error');
             }
         }
 
