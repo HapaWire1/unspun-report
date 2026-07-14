@@ -443,6 +443,10 @@
         .no-credits-gate { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 40px 30px; text-align: center; }
         .no-credits-gate h3 { font-size: 20px; color: #fff; margin-bottom: 10px; }
         .no-credits-gate p { color: var(--muted); margin-bottom: 24px; }
+        .demo-divider { color: var(--muted); font-size: 13px; margin: 18px 0 12px; text-transform: uppercase; letter-spacing: 1px; }
+        .demo-btn { width: auto; display: inline-block; cursor: pointer; }
+        .demo-banner { background: rgba(45, 212, 191, 0.08); border: 1px solid var(--teal, #2dd4bf); border-radius: 10px; padding: 14px 18px; margin-bottom: 24px; font-size: 14px; color: var(--text); }
+        .demo-banner a { color: var(--teal, #2dd4bf); font-weight: 600; }
         .gate-pack-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
         @media (max-width: 600px) {
@@ -547,6 +551,8 @@
                 <button class="primary" style="width:auto; white-space:nowrap;" onclick="signIn()">Send Magic Link</button>
             </div>
             <div class="status" id="auth-status" style="margin-top:14px;"></div>
+            <div class="demo-divider">or</div>
+            <button class="btn-ghost demo-btn" onclick="runDemo()">See a sample audit — no sign-in needed</button>
         </div>
 
         <!-- Signed in, has credits -->
@@ -577,6 +583,10 @@
         </div>
 
         <div id="report" style="display:none">
+
+            <div class="demo-banner" id="demo-banner" style="display:none">
+                <strong>This is a sample audit</strong> — example numbers from a typical small business running Google Ads through an agency. <a href="#tool" onclick="exitDemo()">Sign in to run yours — your first audit is free, no card required.</a>
+            </div>
 
             <div class="box">
                 <h2>Your Marketing Spend Breakdown</h2>
@@ -1030,7 +1040,42 @@
             });
         }
 
+        // ── Demo mode ──────────────────────────────────────────────────────────
+        // Runs a sample audit with realistic example numbers. No sign-in, no credit
+        // consumed, no audit_metrics row written (logAuditEvent already no-ops when
+        // signed out). Deep-linkable via unspun.report/#demo for launch posts.
+        const DEMO_DATA = {
+            agencyFee: 1400, adSpend: 2050, impressions: 48300,
+            clicks: 970, cpc: 2.11, conversions: 31,
+            costPerConversion: 66.13, platform: 'google'
+        };
+        let demoActive = false;
+
+        function runDemo() {
+            demoActive = true;
+            Object.assign(data, DEMO_DATA);
+            displayReport();
+            document.getElementById('demo-banner').style.display = 'block';
+            document.getElementById('report').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function exitDemo() {
+            if (!demoActive) return;
+            demoActive = false;
+            Object.keys(data).forEach(k => data[k] = null);
+            document.getElementById('demo-banner').style.display = 'none';
+            document.getElementById('report').style.display = 'none';
+            document.getElementById('auth-email').focus();
+        }
+
+        // Module scripts execute after the DOM is parsed, so DOMContentLoaded may have
+        // already fired — call directly instead of listening for it.
+        if (window.location.hash === '#demo') {
+            setTimeout(runDemo, 300);
+        }
+
         function displayReport() {
+            document.getElementById('demo-banner').style.display = demoActive ? 'block' : 'none';
             applyPlatformLabels();
             const fee = data.agencyFee, spend = data.adSpend;
             const total = (fee != null && spend != null) ? fee + spend : spend;
@@ -1089,6 +1134,8 @@
         window.signOut = signOut;
         window.calculate = calculate;
         window.applyManualFee = applyManualFee;
+        window.runDemo = runDemo;
+        window.exitDemo = exitDemo;
 
         initAuth();
     </script>
