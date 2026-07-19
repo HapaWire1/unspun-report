@@ -676,6 +676,11 @@
         }
         .dp-scene.active .dp-verdict-box { opacity: 1; transform: translateY(0); }
         .dp-verdict-box .big { font-family: var(--font-mono); font-size: 26px; font-weight: 600; color: var(--green); display: block; margin-bottom: 6px; }
+        .dp-verdict-box.loss {
+            background: rgba(255, 123, 107, 0.08);
+            border-color: rgba(255, 123, 107, 0.5);
+        }
+        .dp-verdict-box.loss .big { color: var(--red); }
         .dp-endcard { text-align: center; padding-top: 30px; }
         .dp-endcard h3 { font-size: 30px; }
         .dp-endcard p { color: var(--muted); margin-bottom: 24px; }
@@ -1259,11 +1264,11 @@
                     <p class="dp-kicker">Step 5 · The verdict</p>
                     <h3>Making money, or losing it?</h3>
                     <div class="dp-lines" style="margin-bottom:14px;">
-                        <div class="dp-line"><span class="dp-key">Your average customer is worth</span><span class="dp-val">$300.00</span></div>
+                        <div class="dp-line"><span class="dp-key">If your average customer is worth</span><span class="dp-val">$150.00</span></div>
                     </div>
-                    <div class="dp-verdict-box">
-                        <span class="big">+$123.44 per customer</span>
-                        You're making money — and now you know 40¢ of every marketing dollar goes to fees, not ads.
+                    <div class="dp-verdict-box loss">
+                        <span class="big">−$26.56 per customer</span>
+                        You'd be losing money on every single new customer — and the agency's report would still look exactly this good.
                     </div>
                 </div>
 
