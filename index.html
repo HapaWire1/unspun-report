@@ -1,287 +1,902 @@
 <!DOCTYPE html>
-<!-- Vercel deploy pipeline had been stuck since ~Apr 14 2026; reconnected Git integration 12 Jul 2026 -->
-<html>
+<html lang="en">
 <head>
-    <title>Unspun</title>
+    <title>Unspun — Find out what your ad spend actually buys</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Upload your agency invoice and ad report. Unspun tells you — in plain English — what a new customer actually costs you. First audit free.">
+    <link rel="canonical" href="https://unspun.report/">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://unspun.report/">
+    <meta property="og:site_name" content="Unspun">
+    <meta property="og:title" content="Unspun — Find out what your ad spend actually buys">
+    <meta property="og:description" content="Upload your agency invoice and ad report. Unspun tells you — in plain English — what a new customer actually costs you. First audit free.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg:        #0a0f1e;
-            --surface:   #111827;
-            --surface2:  #1a2438;
-            --border:    #1f2f4a;
+            /* Page (paper) palette */
+            --paper:      #F7F4EC;
+            --paper-hi:   #FDFCF8;
+            --paper-line: #E4DFD2;
+            --ink:        #16130D;
+            --ink-soft:   #5C564A;
+            --teal-deep:  #0A7C66;
+            --red-ink:    #C93A3A;
+            --amber:      #B87A1E;
+
+            /* Ledger (dark product panel) palette — legacy var names kept because
+               the tool/report markup and its inline styles reference them */
+            --bg:        #12100C;
+            --surface:   #1D1A14;
+            --surface2:  #27231B;
+            --border:    #37321F;
             --teal:      #00d4aa;
             --teal-dim:  #00a888;
-            --text:      #e2e8f0;
-            --muted:     #7a8fa6;
-            --red:       #ff6b6b;
+            --text:      #EDE9DE;
+            --muted:     #9A937F;
+            --red:       #FF7B6B;
             --green:     #4ade80;
+
+            --font-display: 'Fraunces', Georgia, serif;
+            --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            --font-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
         }
 
+        html { scroll-behavior: smooth; }
+
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            font-family: var(--font-body);
+            background: var(--paper);
+            color: var(--ink);
             line-height: 1.6;
         }
+
+        ::selection { background: var(--teal-deep); color: var(--paper-hi); }
 
         /* ── NAV ── */
         nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 40px;
-            border-bottom: 1px solid var(--border);
+            padding: 16px 40px;
             position: sticky;
             top: 0;
-            background: rgba(10,15,30,0.95);
-            backdrop-filter: blur(8px);
+            background: rgba(247, 244, 236, 0.92);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--paper-line);
             z-index: 100;
         }
         .logo {
-            font-size: 22px;
+            font-family: var(--font-display);
             font-weight: 700;
-            color: var(--teal);
+            font-size: 24px;
+            color: var(--ink);
             letter-spacing: -0.5px;
+            text-decoration: none;
         }
+        .logo::after { content: '.'; color: var(--teal-deep); }
+        .nav-links {
+            display: flex;
+            gap: 34px;
+            align-items: center;
+        }
+        .nav-links a:not(.nav-cta) {
+            font-size: 14.5px;
+            font-weight: 500;
+            color: var(--ink-soft);
+            text-decoration: none;
+        }
+        .nav-links .nav-cta { margin-left: 10px; }
+        .nav-links a:not(.nav-cta):hover { color: var(--ink); }
         .nav-cta {
-            background: var(--teal);
-            color: #000;
+            background: var(--ink);
+            color: var(--paper-hi);
             border: none;
-            padding: 9px 20px;
+            padding: 10px 22px;
             font-size: 14px;
             font-weight: 600;
-            border-radius: 6px;
+            border-radius: 999px;
             cursor: pointer;
             text-decoration: none;
         }
-        .nav-cta:hover { background: var(--teal-dim); }
+        .nav-cta:hover { background: var(--teal-deep); }
+        .user-bar { display: flex; align-items: center; gap: 14px; font-size: 14px; }
+        .user-bar .user-email { color: var(--ink-soft); }
+        .credit-pill {
+            background: rgba(10, 124, 102, 0.1);
+            border: 1px solid var(--teal-deep);
+            color: var(--teal-deep);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-family: var(--font-mono);
+        }
+        .sign-out-btn {
+            background: none;
+            border: 1px solid var(--paper-line);
+            color: var(--ink-soft);
+            padding: 6px 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .sign-out-btn:hover { border-color: var(--ink); color: var(--ink); }
 
         /* ── HERO ── */
         .hero {
-            max-width: 780px;
+            max-width: 1120px;
             margin: 0 auto;
-            padding: 90px 24px 70px;
-            text-align: center;
+            padding: 72px 24px 64px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+            gap: 56px;
+            align-items: center;
         }
         .hero-eyebrow {
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 2px;
+            font-size: 12.5px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
             text-transform: uppercase;
-            color: var(--teal);
-            margin-bottom: 20px;
+            color: var(--amber);
+            margin-bottom: 22px;
         }
         .hero h1 {
-            font-size: clamp(36px, 5vw, 58px);
-            font-weight: 800;
-            line-height: 1.15;
+            font-family: var(--font-display);
+            font-size: clamp(38px, 4.6vw, 62px);
+            font-weight: 600;
+            line-height: 1.08;
             letter-spacing: -1px;
             margin-bottom: 24px;
-            color: #fff;
+            color: var(--ink);
+            text-wrap: balance;
         }
         .hero h1 em {
-            font-style: normal;
-            color: var(--teal);
+            font-style: italic;
+            font-weight: 600;
+            color: var(--teal-deep);
         }
         .hero-sub {
             font-size: 18px;
-            color: var(--muted);
-            max-width: 600px;
-            margin: 0 auto 40px;
+            color: var(--ink-soft);
+            max-width: 520px;
+            margin-bottom: 34px;
             line-height: 1.7;
         }
         .hero-actions {
             display: flex;
             gap: 14px;
-            justify-content: center;
+            align-items: center;
             flex-wrap: wrap;
         }
         .btn-primary {
-            background: var(--teal);
-            color: #000;
+            background: var(--ink);
+            color: var(--paper-hi);
             border: none;
-            padding: 14px 28px;
+            padding: 16px 30px;
             font-size: 16px;
             font-weight: 700;
-            border-radius: 8px;
+            border-radius: 999px;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
+            transition: background 0.2s, transform 0.15s;
         }
-        .btn-primary:hover { background: var(--teal-dim); }
+        .btn-primary:hover { background: var(--teal-deep); transform: translateY(-1px); }
         .btn-ghost {
             background: transparent;
-            color: var(--text);
-            border: 1px solid var(--border);
-            padding: 14px 28px;
-            font-size: 16px;
+            color: var(--ink);
+            border: 1.5px solid var(--ink);
+            padding: 14px 26px;
+            font-size: 15px;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: 999px;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
         }
-        .btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
-
-        /* ── SOCIAL PROOF STRIP ── */
-        .proof-strip {
-            background: var(--surface);
-            border-top: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
-            padding: 18px 24px;
-            text-align: center;
-            font-size: 14px;
-            color: var(--muted);
+        .btn-ghost:hover { border-color: var(--teal-deep); color: var(--teal-deep); }
+        .hero-trust {
+            margin-top: 22px;
+            font-size: 13.5px;
+            color: var(--ink-soft);
         }
-        .proof-strip strong { color: var(--text); }
+        .hero-trust span { white-space: nowrap; }
+        .hero-trust span + span::before { content: '·'; margin: 0 10px; color: var(--paper-line); }
 
-        /* ── PAIN SECTION ── */
+        /* ── RECEIPT ARTIFACT ── */
+        .receipt-wrap { position: relative; display: flex; justify-content: center; }
+        .receipt {
+            position: relative;
+            background: var(--paper-hi);
+            width: min(360px, 100%);
+            padding: 28px 26px 40px;
+            font-family: var(--font-mono);
+            font-size: 13.5px;
+            color: #2A2620;
+            box-shadow: 0 24px 60px -18px rgba(22, 19, 13, 0.35), 0 4px 14px rgba(22, 19, 13, 0.12);
+            transform: rotate(1.6deg);
+            border-radius: 3px 3px 0 0;
+        }
+        /* perforated receipt bottom edge */
+        .receipt::after {
+            content: '';
+            position: absolute;
+            left: 0; right: 0; bottom: -1px;
+            height: 12px;
+            background: radial-gradient(circle at 9px -3px, transparent 8px, var(--paper) 8.5px);
+            background-size: 24px 12px;
+            background-repeat: repeat-x;
+        }
+        .receipt-head {
+            text-align: center;
+            border-bottom: 1.5px dashed #C9C2B0;
+            padding-bottom: 14px;
+            margin-bottom: 16px;
+        }
+        .receipt-head .rc-title { font-weight: 600; font-size: 14px; letter-spacing: 2px; }
+        .receipt-head .rc-sub { font-size: 11.5px; color: #837C6B; margin-top: 3px; }
+        .rc-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 4px 0;
+        }
+        .rc-row .rc-val { font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .rc-row.rc-total {
+            border-top: 1.5px dashed #C9C2B0;
+            margin-top: 10px;
+            padding-top: 12px;
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .rc-divider {
+            border: none;
+            border-top: 1.5px dashed #C9C2B0;
+            margin: 14px 0;
+        }
+        .rc-note { font-size: 11.5px; color: #837C6B; text-align: center; margin-top: 4px; }
+        .rc-verdict {
+            margin-top: 16px;
+            border: 2.5px solid var(--red-ink);
+            color: var(--red-ink);
+            border-radius: 6px;
+            padding: 10px 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            line-height: 1.45;
+            transform: rotate(-2.4deg);
+        }
+        .rc-verdict .rc-big { font-size: 22px; display: block; letter-spacing: 0.5px; }
+        .receipt-caption {
+            position: absolute;
+            bottom: -46px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 13px;
+            color: var(--ink-soft);
+            white-space: nowrap;
+        }
+        .receipt-caption a { color: var(--teal-deep); font-weight: 600; }
+
+        /* ── SECTION SCAFFOLD (paper) ── */
         .section {
             max-width: 900px;
             margin: 0 auto;
             padding: 80px 24px;
         }
         .section-label {
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 2px;
+            font-size: 12.5px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
             text-transform: uppercase;
-            color: var(--teal);
+            color: var(--amber);
             margin-bottom: 14px;
         }
         .section h2 {
-            font-size: clamp(26px, 3.5vw, 38px);
-            font-weight: 700;
-            line-height: 1.25;
+            font-family: var(--font-display);
+            font-size: clamp(28px, 3.6vw, 42px);
+            font-weight: 600;
+            line-height: 1.15;
+            letter-spacing: -0.5px;
             margin-bottom: 18px;
-            color: #fff;
+            color: var(--ink);
+            text-wrap: balance;
         }
-        .section p {
+        .section h2 em { font-style: italic; color: var(--teal-deep); }
+        .section > p, .section-intro {
             font-size: 17px;
-            color: var(--muted);
-            max-width: 620px;
+            color: var(--ink-soft);
+            max-width: 640px;
             line-height: 1.75;
         }
 
+        /* ── CASE STUDY ── */
+        #real-audit { max-width: 1080px; }
+        .case-attribution {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 18px 0 36px;
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            color: var(--ink-soft);
+            border: 1px solid var(--paper-line);
+            background: var(--paper-hi);
+            border-radius: 999px;
+            padding: 7px 16px;
+        }
+        .case-attribution::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
+        .case-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            align-items: stretch;
+        }
+        .case-panel {
+            border-radius: 14px;
+            padding: 26px;
+            position: relative;
+        }
+        .case-panel .cp-tag {
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+        .case-before {
+            background: var(--paper-hi);
+            border: 1px solid var(--paper-line);
+            box-shadow: 0 10px 30px -18px rgba(22,19,13,0.25);
+        }
+        .case-before .cp-tag { color: var(--ink-soft); }
+        .agency-report {
+            font-size: 12px;
+            color: #4B463C;
+            background: #FFF;
+            border: 1px solid #E8E3D6;
+            border-radius: 8px;
+            padding: 18px;
+            overflow-x: auto;
+        }
+        .agency-report .ar-head {
+            font-weight: 700;
+            font-size: 13px;
+            color: #23201A;
+            margin-bottom: 4px;
+        }
+        .agency-report .ar-sub { color: #8B8371; font-size: 11px; margin-bottom: 14px; }
+        .agency-report table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            min-width: 380px;
+        }
+        .agency-report th {
+            text-align: right;
+            font-weight: 600;
+            color: #8B8371;
+            border-bottom: 1px solid #E8E3D6;
+            padding: 6px 8px;
+            white-space: nowrap;
+        }
+        .agency-report td {
+            text-align: right;
+            padding: 8px;
+            border-bottom: 1px solid #F1EDE2;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+        .agency-report .ar-jargon {
+            margin-top: 14px;
+            font-size: 11.5px;
+            line-height: 1.65;
+            color: #6B6455;
+        }
+        .ar-highlight {
+            background: rgba(201, 58, 58, 0.1);
+            outline: 2px dashed var(--red-ink);
+            outline-offset: 2px;
+            border-radius: 3px;
+        }
+        .case-missing {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            font-size: 13.5px;
+            color: var(--red-ink);
+            font-weight: 600;
+            line-height: 1.5;
+        }
+        .case-missing::before { content: '✗'; font-size: 15px; line-height: 1.4; }
+        .case-after {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            box-shadow: 0 18px 44px -16px rgba(22,19,13,0.5);
+        }
+        .case-after .cp-tag { color: var(--teal); }
+        .verdict-lines { font-size: 15px; line-height: 2.05; }
+        .verdict-lines .vl-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            border-bottom: 1px dashed rgba(154, 147, 127, 0.25);
+            padding: 5px 0;
+        }
+        .verdict-lines .vl-row span:last-child {
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+            color: var(--paper-hi);
+            white-space: nowrap;
+        }
+        .verdict-lines .vl-key { color: var(--muted); }
+        .verdict-final {
+            margin-top: 18px;
+            background: rgba(0, 212, 170, 0.08);
+            border: 1px solid rgba(0, 212, 170, 0.4);
+            border-radius: 10px;
+            padding: 16px 18px;
+            font-size: 14.5px;
+            line-height: 1.65;
+        }
+        .verdict-final strong { color: var(--teal); }
+        .verdict-final.loss {
+            background: rgba(255, 123, 107, 0.09);
+            border-color: rgba(255, 123, 107, 0.5);
+        }
+        .verdict-final.loss strong { color: var(--red); }
+        .case-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 26px;
+        }
+        .stat-card {
+            background: var(--paper-hi);
+            border: 1px solid var(--paper-line);
+            border-radius: 12px;
+            padding: 20px 22px;
+        }
+        .stat-card .st-num {
+            font-family: var(--font-mono);
+            font-size: 26px;
+            font-weight: 600;
+            color: var(--ink);
+            letter-spacing: -0.5px;
+        }
+        .stat-card .st-num.st-red { color: var(--red-ink); }
+        .stat-card .st-num.st-teal { color: var(--teal-deep); }
+        .stat-card .st-label { font-size: 13px; color: var(--ink-soft); margin-top: 6px; line-height: 1.5; }
+
+        /* ── TESTIMONIAL ── */
+        .testimonial {
+            margin-top: 26px;
+            background: var(--paper-hi);
+            border: 1px solid var(--paper-line);
+            border-left: 4px solid var(--teal-deep);
+            border-radius: 14px;
+            padding: 36px 40px 32px;
+            position: relative;
+            box-shadow: 0 12px 30px -22px rgba(22, 19, 13, 0.3);
+        }
+        .testimonial::before {
+            content: '\201C';
+            position: absolute;
+            top: 6px;
+            left: 22px;
+            font-family: var(--font-display);
+            font-size: 76px;
+            line-height: 1;
+            color: var(--teal-deep);
+            opacity: 0.22;
+        }
+        .testimonial blockquote {
+            font-family: var(--font-display);
+            font-style: italic;
+            font-weight: 500;
+            font-size: clamp(17px, 2.1vw, 21px);
+            line-height: 1.65;
+            color: var(--ink);
+            max-width: 64ch;
+        }
+        .testimonial-attr {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: var(--ink-soft);
+        }
+        .testimonial-attr strong { color: var(--ink); font-weight: 700; }
+        .testimonial-attr .verified {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--teal-deep);
+            border: 1px solid rgba(10, 124, 102, 0.35);
+            background: rgba(10, 124, 102, 0.07);
+            padding: 2px 10px;
+            border-radius: 999px;
+        }
+
+        /* ── DEMO PLAYER ── */
+        #demo { max-width: 980px; }
+        .player {
+            margin-top: 34px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 30px 70px -24px rgba(22, 19, 13, 0.55);
+            overflow: hidden;
+        }
+        .player-chrome {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 16px;
+        }
+        .player-chrome .pc-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--surface2); }
+        .player-chrome .pc-dot:nth-child(1) { background: #E5645A; }
+        .player-chrome .pc-dot:nth-child(2) { background: #E5B95A; }
+        .player-chrome .pc-dot:nth-child(3) { background: #6BC26B; }
+        .player-chrome .pc-url {
+            flex: 1;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--muted);
+        }
+        .player-stage {
+            position: relative;
+            min-height: 380px;
+            padding: 34px 38px;
+            color: var(--text);
+        }
+        .dp-scene {
+            position: absolute;
+            inset: 34px 38px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.45s ease, transform 0.45s ease;
+            pointer-events: none;
+        }
+        .dp-scene.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .dp-kicker {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--teal);
+            margin-bottom: 16px;
+        }
+        .dp-scene h3 {
+            font-family: var(--font-display);
+            font-size: 26px;
+            font-weight: 600;
+            color: var(--paper-hi);
+            margin-bottom: 18px;
+            letter-spacing: -0.3px;
+        }
+        .dp-dropzone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 34px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 14.5px;
+        }
+        .dp-files { display: flex; gap: 12px; justify-content: center; margin-top: 18px; flex-wrap: wrap; }
+        .dp-file {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 14px;
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            color: var(--text);
+            opacity: 0;
+            transform: translateY(14px) scale(0.96);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .dp-scene.active .dp-file { opacity: 1; transform: translateY(0) scale(1); }
+        .dp-scene.active .dp-file:nth-child(2) { transition-delay: 0.5s; }
+        .dp-file::before { content: '📄'; font-size: 14px; }
+        .dp-bar {
+            height: 8px;
+            border-radius: 999px;
+            background: var(--surface2);
+            overflow: hidden;
+            margin: 22px 0 12px;
+        }
+        .dp-bar-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--teal-dim), var(--teal));
+            transition: width 3.2s ease;
+        }
+        .dp-scene.active .dp-bar-fill { width: 100%; }
+        .dp-parse-log { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); line-height: 2; }
+        .dp-parse-log div { opacity: 0; transition: opacity 0.3s ease; }
+        .dp-scene.active .dp-parse-log div:nth-child(1) { opacity: 1; transition-delay: 0.6s; }
+        .dp-scene.active .dp-parse-log div:nth-child(2) { opacity: 1; transition-delay: 1.5s; }
+        .dp-scene.active .dp-parse-log div:nth-child(3) { opacity: 1; transition-delay: 2.4s; }
+        .dp-parse-log .ok { color: var(--green); }
+        .dp-lines { max-width: 460px; }
+        .dp-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 9px 0;
+            border-bottom: 1px dashed rgba(154, 147, 127, 0.25);
+            font-size: 15px;
+            opacity: 0;
+            transform: translateX(-8px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .dp-scene.active .dp-line { opacity: 1; transform: translateX(0); }
+        .dp-scene.active .dp-line:nth-child(2) { transition-delay: 0.5s; }
+        .dp-scene.active .dp-line:nth-child(3) { transition-delay: 1.0s; }
+        .dp-scene.active .dp-line:nth-child(4) { transition-delay: 1.5s; }
+        .dp-scene.active .dp-line:nth-child(5) { transition-delay: 2.0s; }
+        .dp-line .dp-key { color: var(--muted); }
+        .dp-line .dp-val {
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+            color: var(--paper-hi);
+            white-space: nowrap;
+        }
+        .dp-line.dp-total { border-bottom: none; font-weight: 700; font-size: 17px; }
+        .dp-line.dp-total .dp-key { color: var(--text); }
+        .dp-line.dp-total .dp-val { color: var(--red); }
+        .dp-line .dp-val.teal { color: var(--teal); }
+        .dp-verdict-box {
+            margin-top: 8px;
+            background: rgba(74, 222, 128, 0.08);
+            border: 1px solid rgba(74, 222, 128, 0.45);
+            border-radius: 12px;
+            padding: 20px 22px;
+            max-width: 500px;
+            font-size: 15px;
+            line-height: 1.7;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s ease 1.2s, transform 0.5s ease 1.2s;
+        }
+        .dp-scene.active .dp-verdict-box { opacity: 1; transform: translateY(0); }
+        .dp-verdict-box .big { font-family: var(--font-mono); font-size: 26px; font-weight: 600; color: var(--green); display: block; margin-bottom: 6px; }
+        .dp-verdict-box.loss {
+            background: rgba(255, 123, 107, 0.08);
+            border-color: rgba(255, 123, 107, 0.5);
+        }
+        .dp-verdict-box.loss .big { color: var(--red); }
+        .dp-endcard { text-align: center; padding-top: 30px; }
+        .dp-endcard h3 { font-size: 30px; }
+        .dp-endcard p { color: var(--muted); margin-bottom: 24px; }
+        .dp-endcard .btn-primary { background: var(--teal); color: #05261E; }
+        .dp-endcard .btn-primary:hover { background: var(--teal-dim); }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 18px;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+        }
+        .dp-play {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: var(--teal);
+            color: #05261E;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .dp-play:hover { background: var(--teal-dim); }
+        .dp-steps { display: flex; gap: 6px; flex: 1; }
+        .dp-step {
+            flex: 1;
+            height: 6px;
+            border-radius: 999px;
+            background: var(--surface2);
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            padding: 0;
+        }
+        .dp-step .dp-step-fill {
+            position: absolute;
+            inset: 0;
+            width: 0%;
+            background: var(--teal);
+            border-radius: 999px;
+        }
+        .dp-step.done .dp-step-fill { width: 100%; }
+        .dp-step.current .dp-step-fill { width: 100%; transition: width linear; }
+        .dp-time { font-family: var(--font-mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+        .player-caption { font-size: 13px; color: var(--ink-soft); margin-top: 14px; text-align: center; }
+
+        /* ── HOW IT WORKS ── */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 20px;
+            margin-top: 44px;
+        }
+        .step {
+            background: var(--paper-hi);
+            border: 1px solid var(--paper-line);
+            border-radius: 14px;
+            padding: 26px;
+        }
+        .step-num {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--teal-deep);
+            background: rgba(10, 124, 102, 0.09);
+            border-radius: 999px;
+            width: 34px; height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .step h3 {
+            font-family: var(--font-display);
+            font-size: 19px;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 8px;
+        }
+        .step p { font-size: 14.5px; color: var(--ink-soft); line-height: 1.65; }
+
+        /* ── PAIN QUOTES ── */
         .pain-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 16px;
             margin-top: 40px;
         }
         .pain-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 10px;
+            background: var(--paper-hi);
+            border: 1px solid var(--paper-line);
+            border-radius: 12px;
             padding: 24px;
         }
         .pain-card .quote {
-            font-size: 15px;
-            color: var(--text);
+            font-family: var(--font-display);
+            font-size: 16.5px;
             font-style: italic;
-            line-height: 1.65;
+            color: var(--ink);
+            line-height: 1.55;
         }
-        .pain-card .attribution {
-            font-size: 13px;
-            color: var(--muted);
-            margin-top: 12px;
-        }
+        .pain-card .attribution { font-size: 13px; color: var(--ink-soft); margin-top: 14px; }
 
-        /* ── HOW IT WORKS ── */
-        .how-bg {
-            background: var(--surface);
-            border-top: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
-        }
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 0;
-            margin-top: 50px;
-        }
-        .step {
-            padding: 10px 30px 10px 0;
-            position: relative;
-        }
-        .step:not(:last-child)::after {
-            content: '→';
-            position: absolute;
-            right: 0;
-            top: 24px;
-            color: var(--teal);
-            font-size: 22px;
-        }
-        .step-num {
-            font-size: 40px;
-            font-weight: 800;
-            color: var(--teal);
-            opacity: 0.25;
-            line-height: 1;
-            margin-bottom: 10px;
-        }
-        .step h3 {
-            font-size: 17px;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 8px;
-        }
-        .step p {
-            font-size: 14px;
-            color: var(--muted);
-            line-height: 1.6;
-        }
-
-        /* ── TOOL SECTION ── */
+        /* ══ DARK LEDGER PANEL: the tool itself ══
+           The markup inside #tool is untouched working product code — these styles
+           re-skin it as the dark in-app panel sitting on the paper page. */
         #tool {
             scroll-margin-top: 80px;
+            max-width: 1000px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 64px 48px;
+            margin-top: 20px;
+            margin-bottom: 90px;
+            color: var(--text);
+            box-shadow: 0 34px 80px -30px rgba(22, 19, 13, 0.6);
         }
-        .tool-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
+        #tool .section-label { color: var(--teal); }
+        .tool-header { text-align: center; margin-bottom: 40px; }
         .tool-header h2 {
+            font-family: var(--font-display);
             font-size: clamp(26px, 3.5vw, 36px);
-            font-weight: 700;
-            color: #fff;
+            font-weight: 600;
+            color: var(--paper-hi);
             margin-bottom: 10px;
         }
-        .tool-header p {
-            font-size: 16px;
-            color: var(--muted);
+        .tool-header p { font-size: 15.5px; color: var(--muted); }
+
+        .auth-gate {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 40px 30px;
+            text-align: center;
         }
+        .auth-gate p { color: var(--muted); margin-bottom: 20px; font-size: 15px; }
+        .auth-gate p strong { color: var(--text); }
+        .auth-input-row { display: flex; gap: 10px; max-width: 430px; margin: 0 auto; }
+        .auth-input {
+            flex: 1;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 12px 14px;
+            border-radius: 999px;
+            font-size: 15px;
+            padding-left: 18px;
+        }
+        .auth-input:focus { outline: none; border-color: var(--teal); }
+        .demo-divider { color: var(--muted); font-size: 12px; margin: 20px 0 12px; text-transform: uppercase; letter-spacing: 1.5px; }
+        .demo-btn { width: auto; display: inline-block; cursor: pointer; }
+        #tool .btn-ghost {
+            color: var(--text);
+            border-color: var(--border);
+            border-radius: 999px;
+        }
+        #tool .btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
+        .demo-banner {
+            background: rgba(0, 212, 170, 0.08);
+            border: 1px solid var(--teal);
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: var(--text);
+        }
+        .demo-banner a { color: var(--teal); font-weight: 600; }
+
+        button.primary {
+            background: var(--teal);
+            color: #05261E;
+            border: none;
+            padding: 13px 26px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 999px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button.primary:hover { background: var(--teal-dim); }
+        button.primary:disabled { background: var(--surface2); color: var(--muted); cursor: not-allowed; }
+        a.primary {
+            background: var(--teal);
+            color: #05261E;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 15px;
+        }
+        a.primary:hover { background: var(--teal-dim); }
 
         .upload-area {
             border: 2px dashed var(--border);
             padding: 50px 30px;
             text-align: center;
-            border-radius: 12px;
+            border-radius: 14px;
             background: var(--surface);
             transition: border-color 0.2s, background 0.2s;
             cursor: pointer;
         }
-        .upload-area.dragover {
-            border-color: var(--teal);
-            background: var(--surface2);
-        }
+        .upload-area.dragover { border-color: var(--teal); background: var(--surface2); }
         .upload-area p { color: var(--muted); margin-bottom: 20px; font-size: 15px; }
         .upload-area p strong { color: var(--text); }
-
         .manual-input { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
         .manual-input label { display: block; margin-bottom: 8px; font-size: 14px; color: var(--muted); }
-        .manual-input input {
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 8px 12px;
-            border-radius: 6px;
-            width: 180px;
-            font-size: 15px;
-        }
-
         #loading { display: none; color: var(--teal); text-align: center; padding: 12px; }
         .spinner {
             display: inline-block; width: 16px; height: 16px;
@@ -290,8 +905,7 @@
             vertical-align: middle; margin-right: 8px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        .file-list { text-align: left; margin: 14px 0; font-size: 14px; }
+        .file-list { text-align: left; margin: 14px 0; font-size: 14px; font-family: var(--font-mono); }
         .file-item { padding: 4px 0; color: var(--muted); }
         .file-item.parsed { color: var(--green); }
         .file-item.failed { color: var(--red); }
@@ -299,63 +913,79 @@
         .status.error { color: var(--red); }
         .status.success { color: var(--green); }
         #file-input { display: none; }
-
-        /* ── REPORT CARDS ── */
-        .box {
-            background: var(--surface);
-            padding: 28px;
-            border-radius: 10px;
-            margin: 20px 0;
-            border-left: 4px solid var(--teal);
-        }
-        .box h2 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 16px; }
-        .box p { margin-bottom: 8px; font-size: 15px; }
-        .highlight { color: var(--teal); font-weight: bold; }
-
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
-        th { background: var(--surface2); color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
-        .term { border-right: 3px solid var(--teal); font-weight: bold; width: 35%; color: var(--text); }
-
         .pl-input {
             background: var(--surface2);
             border: 1px solid var(--border);
             color: var(--text);
             padding: 8px 12px;
-            border-radius: 6px;
-            width: 140px;
+            border-radius: 8px;
+            width: 150px;
             font-size: 16px;
+            font-family: var(--font-mono);
         }
-
-        /* ── PRICING ── */
-        .pricing-bg {
+        .no-credits-gate {
             background: var(--surface);
-            border-top: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 40px 30px;
+            text-align: center;
         }
+        .no-credits-gate h3 { font-family: var(--font-display); font-size: 22px; color: var(--paper-hi); margin-bottom: 10px; }
+        .no-credits-gate p { color: var(--muted); margin-bottom: 24px; }
+        .gate-pack-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+        /* report boxes */
+        .box {
+            background: var(--surface);
+            padding: 28px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 4px solid var(--teal);
+        }
+        .box h2 {
+            font-family: var(--font-display);
+            font-size: 19px;
+            font-weight: 600;
+            color: var(--paper-hi);
+            margin-bottom: 16px;
+        }
+        .box p { margin-bottom: 8px; font-size: 15px; }
+        .box p strong { color: var(--text); }
+        .highlight { color: var(--teal); font-weight: bold; font-family: var(--font-mono); }
+        #report span[id^="r-"] { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+        #tool table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        #tool th, #tool td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
+        #tool th { background: var(--surface2); color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: 1px; }
+        #tool .term { border-right: 3px solid var(--teal); font-weight: 600; width: 35%; color: var(--text); }
+
+        /* ── PRICING (paper) ── */
+        #pricing { max-width: 1080px; text-align: center; }
         .pricing-grid {
             display: flex;
             gap: 20px;
             justify-content: center;
             align-items: stretch;
             flex-wrap: wrap;
-            margin-top: 40px;
+            margin-top: 44px;
         }
         .pricing-card {
             flex: 1 1 280px;
-            max-width: 320px;
+            max-width: 330px;
             position: relative;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 14px;
+            background: var(--paper-hi);
+            border: 1px solid var(--paper-line);
+            border-radius: 16px;
             padding: 36px 28px;
             text-align: center;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 12px 30px -20px rgba(22,19,13,0.25);
         }
         .pricing-card.featured {
-            border: 1px solid var(--teal);
-            transform: translateY(-6px);
+            background: var(--bg);
+            border-color: var(--border);
+            transform: translateY(-8px);
+            box-shadow: 0 26px 54px -22px rgba(22,19,13,0.55);
         }
         .pricing-badge {
             position: absolute;
@@ -363,27 +993,27 @@
             left: 50%;
             transform: translateX(-50%);
             background: var(--teal);
-            color: #000;
+            color: #05261E;
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.5px;
             text-transform: uppercase;
-            padding: 4px 12px;
-            border-radius: 20px;
+            padding: 4px 14px;
+            border-radius: 999px;
             white-space: nowrap;
         }
         .pricing-card .price {
-            font-size: 52px;
-            font-weight: 800;
-            color: var(--teal);
+            font-family: var(--font-mono);
+            font-size: 50px;
+            font-weight: 600;
+            color: var(--ink);
             line-height: 1;
+            letter-spacing: -1px;
         }
+        .pricing-card.featured .price { color: var(--teal); }
         .pricing-card .price sup { font-size: 24px; vertical-align: super; }
-        .pricing-card .price-desc {
-            font-size: 15px;
-            color: var(--muted);
-            margin: 8px 0 28px;
-        }
+        .pricing-card .price-desc { font-size: 14.5px; color: var(--ink-soft); margin: 10px 0 26px; }
+        .pricing-card.featured .price-desc { color: var(--muted); }
         .pricing-features {
             flex-grow: 1;
             list-style: none;
@@ -391,68 +1021,64 @@
             margin-bottom: 28px;
         }
         .pricing-features li {
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 15px;
-            color: var(--text);
+            padding: 9px 0;
+            border-bottom: 1px solid var(--paper-line);
+            font-size: 14.5px;
+            color: var(--ink);
         }
-        .pricing-features li::before {
-            content: '✓ ';
-            color: var(--teal);
-            font-weight: 700;
-        }
+        .pricing-card.featured .pricing-features li { border-color: var(--border); color: var(--text); }
+        .pricing-features li::before { content: '✓ '; color: var(--teal-deep); font-weight: 700; }
+        .pricing-card.featured .pricing-features li::before { color: var(--teal); }
         .pricing-features li:last-child { border-bottom: none; }
+        .pricing-card a.primary { display: block; text-align: center; text-decoration: none; padding: 14px; }
+        .pricing-card:not(.featured) a.primary { background: var(--ink); color: var(--paper-hi); }
+        .pricing-card:not(.featured) a.primary:hover { background: var(--teal-deep); }
+        .pricing-note { font-size: 13.5px; color: var(--ink-soft); margin-top: 26px; }
 
-        /* ── BUTTONS ── */
-        button.primary, .btn-primary {
-            background: var(--teal);
-            color: #000;
-            border: none;
-            padding: 13px 26px;
-            font-size: 15px;
-            font-weight: 700;
-            border-radius: 7px;
-            cursor: pointer;
-            width: 100%;
-        }
-        button.primary:hover { background: var(--teal-dim); }
-        button.primary:disabled { background: #333; color: #666; cursor: not-allowed; }
+        /* ── REFERRAL ── */
+        #referral { text-align: center; max-width: 640px; }
+        #referral .btn-primary { max-width: 330px; margin: 0 auto; width: 100%; }
 
         /* ── FOOTER ── */
         footer {
-            text-align: center;
-            padding: 40px 24px;
-            font-size: 13px;
+            background: var(--ink);
             color: var(--muted);
-            border-top: 1px solid var(--border);
+            text-align: center;
+            padding: 56px 24px 44px;
+            margin-top: 40px;
+            font-size: 13px;
         }
+        footer .f-logo {
+            font-family: var(--font-display);
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--paper-hi);
+            margin-bottom: 8px;
+        }
+        footer .f-logo span { color: var(--teal); }
+        footer .f-tag { font-family: var(--font-display); font-style: italic; font-size: 15px; color: var(--muted); }
         footer a { color: var(--teal); text-decoration: none; }
+        footer .f-fine { margin-top: 22px; font-size: 12px; color: #6B6455; }
 
-        /* ── AUTH ── */
-        .user-bar { display: flex; align-items: center; gap: 14px; font-size: 14px; }
-        .user-bar .user-email { color: var(--muted); }
-        .user-bar .credit-pill { background: rgba(0,212,170,0.15); border: 1px solid var(--teal); color: var(--teal); font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
-        .user-bar .sign-out-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; }
-        .user-bar .sign-out-btn:hover { border-color: var(--teal); color: var(--teal); }
-        .auth-gate { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 40px 30px; text-align: center; }
-        .auth-gate p { color: var(--muted); margin-bottom: 20px; font-size: 15px; }
-        .auth-gate p strong { color: var(--text); }
-        .auth-input-row { display: flex; gap: 10px; max-width: 420px; margin: 0 auto; }
-        .auth-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 12px 14px; border-radius: 7px; font-size: 15px; }
-        .auth-input:focus { outline: none; border-color: var(--teal); }
-        .no-credits-gate { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 40px 30px; text-align: center; }
-        .no-credits-gate h3 { font-size: 20px; color: #fff; margin-bottom: 10px; }
-        .no-credits-gate p { color: var(--muted); margin-bottom: 24px; }
-        .demo-divider { color: var(--muted); font-size: 13px; margin: 18px 0 12px; text-transform: uppercase; letter-spacing: 1px; }
-        .demo-btn { width: auto; display: inline-block; cursor: pointer; }
-        .demo-banner { background: rgba(45, 212, 191, 0.08); border: 1px solid var(--teal, #2dd4bf); border-radius: 10px; padding: 14px 18px; margin-bottom: 24px; font-size: 14px; color: var(--text); }
-        .demo-banner a { color: var(--teal, #2dd4bf); font-weight: 600; }
-        .gate-pack-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; gap: 64px; padding-top: 48px; }
+            .receipt-wrap { margin-bottom: 30px; }
+            .case-grid { grid-template-columns: 1fr; }
+            nav { padding: 14px 20px; }
+            .nav-links a:not(.nav-cta):not(.user-bar a) { display: none; }
+            #tool { padding: 44px 20px; border-radius: 16px; }
+            .player-stage { padding: 26px 20px; min-height: 430px; }
+            .dp-scene { inset: 26px 20px; }
+        }
         @media (max-width: 600px) {
-            nav { padding: 16px 20px; }
-            .step:not(:last-child)::after { display: none; }
             .auth-input-row { flex-direction: column; }
+            .auth-input { border-radius: 12px; }
+            .hero h1 { font-size: 36px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .dp-scene, .dp-file, .dp-line, .dp-verdict-box, .dp-bar-fill, .dp-parse-log div { transition: none !important; }
         }
     </style>
 </head>
@@ -460,8 +1086,19 @@
 
     <!-- NAV -->
     <nav>
-        <span class="logo">unspun</span>
-        <div id="nav-signed-out"><a href="#tool" class="nav-cta">Run My Audit</a></div>
+        <a class="logo" href="#">unspun</a>
+        <!-- The product script toggles #nav-signed-out between display:none and
+             display:block — flex layout lives on the inner .nav-links so the
+             toggle can't flatten the link spacing. -->
+        <div id="nav-signed-out">
+            <div class="nav-links">
+                <a href="#real-audit">Real audit</a>
+                <a href="#demo">Demo</a>
+                <a href="#how-it-works">How it works</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#tool" class="nav-cta">Run my free audit</a>
+            </div>
+        </div>
         <div id="nav-signed-in" class="user-bar" style="display:none">
             <span class="credit-pill" id="nav-credits">— audits</span>
             <span class="user-email" id="nav-email"></span>
@@ -471,70 +1108,231 @@
 
     <!-- HERO -->
     <section class="hero">
-        <p class="hero-eyebrow">Ad spend clarity for small business</p>
-        <h1>Your money. Their jargon.<br><em>Our translation.</em></h1>
-        <p class="hero-sub">We take your confusing agency reports and show you what's really happening with your money — in plain English, in under 60 seconds.</p>
-        <div class="hero-actions">
-            <a href="#tool" class="btn-primary">Run a Free Audit</a>
-            <a href="#how-it-works" class="btn-ghost">See how it works</a>
+        <div>
+            <p class="hero-eyebrow">For business owners who pay for ads</p>
+            <h1>Every month you pay for ads. <em>Find out what you bought.</em></h1>
+            <p class="hero-sub">Upload your agency's invoice and your Google or Meta ads report. Sixty seconds later, Unspun hands you the one number that matters — what a new customer actually costs you. In plain English.</p>
+            <div class="hero-actions">
+                <a href="#tool" class="btn-primary">Run my free audit</a>
+                <a href="#demo" class="btn-ghost">▶&nbsp; Watch a real audit</a>
+            </div>
+            <p class="hero-trust"><span>First audit free</span><span>No card required</span><span>Files never leave your browser</span></p>
+        </div>
+        <div class="receipt-wrap">
+            <div class="receipt" aria-label="Sample audit receipt based on a real business">
+                <div class="receipt-head">
+                    <div class="rc-title">UNSPUN AUDIT</div>
+                    <div class="rc-sub">MindBody Med · Seattle, WA · 1 month</div>
+                </div>
+                <div class="rc-row"><span>Agency management fee</span><span class="rc-val">$1,408.00</span></div>
+                <div class="rc-row"><span>Google Ads spend</span><span class="rc-val">$2,123.25</span></div>
+                <div class="rc-row rc-total"><span>TOTAL PAID</span><span class="rc-val">$3,531.25</span></div>
+                <hr class="rc-divider">
+                <div class="rc-row"><span>Ad views</span><span class="rc-val">3,670</span></div>
+                <div class="rc-row"><span>Clicks</span><span class="rc-val">225 × $9.44</span></div>
+                <div class="rc-row"><span>New patients</span><span class="rc-val">20</span></div>
+                <div class="rc-verdict">
+                    TRUE COST PER PATIENT
+                    <span class="rc-big">$176.56</span>
+                </div>
+                <div class="rc-note">A patient is worth $149. They were losing money on every one — and the report never showed it.</div>
+            </div>
+            <p class="receipt-caption">Real numbers, real business — <a href="#real-audit">see the full audit ↓</a></p>
         </div>
     </section>
 
-    <!-- SOCIAL PROOF STRIP -->
-    <div class="proof-strip">
-        Built for business owners who are <strong>paying for ads</strong> but can't tell if they're working.
-    </div>
+    <!-- REAL AUDIT CASE STUDY -->
+    <section class="section" id="real-audit">
+        <p class="section-label">A real audit</p>
+        <h2>Their agency's report said <em>everything was fine.</em></h2>
+        <p class="section-intro">MindBody Med, a Seattle wellness clinic doing about $1.3M a year, was paying its agency every month — and had no idea whether any of it worked. This is what their monthly report looked like, and what Unspun found in it.</p>
+        <div class="case-attribution">Real client data · MindBody Med, Seattle · Google Ads · one month · shared with permission</div>
 
-    <!-- PAIN SECTION -->
-    <section class="section">
-        <p class="section-label">Sound familiar?</p>
-        <h2>You're paying real money.<br>Getting confusing reports.</h2>
-        <p>Marketing agencies send monthly PDFs full of terms like "CPC," "blended ROAS," and "conversion attribution" — and most business owners just nod and keep paying.</p>
+        <div class="case-grid">
+            <div class="case-panel case-before">
+                <p class="cp-tag">What the agency sent</p>
+                <div class="agency-report">
+                    <div class="ar-head">Monthly Performance Report</div>
+                    <div class="ar-sub">Google Ads · Campaign summary</div>
+                    <table>
+                        <tr><th>Avg CPC</th><th>Clicks</th><th>Conv.</th><th>Cost</th><th>Cost/Conv.</th><th>Impr.</th></tr>
+                        <tr>
+                            <td>$9.44</td>
+                            <td>225</td>
+                            <td>20.00</td>
+                            <td>$2,123.25</td>
+                            <td class="ar-highlight">$106.16</td>
+                            <td>3,670</td>
+                        </tr>
+                    </table>
+                    <p class="ar-jargon">Strong CTR performance at 6.13% (vs. 3.1% vertical benchmark). Conversion volume stable MoM. Recommend maintaining current budget allocation and expanding branded keyword coverage to capture incremental search demand…</p>
+                </div>
+                <p class="case-missing">The $1,408/mo management fee appears nowhere on this report. The real cost per patient isn't $106 — and nothing here says whether $106 is even good.</p>
+            </div>
+
+            <div class="case-panel case-after">
+                <p class="cp-tag">What Unspun told them</p>
+                <div class="verdict-lines">
+                    <div class="vl-row"><span class="vl-key">You paid, in total</span><span>$3,531.25</span></div>
+                    <div class="vl-row"><span class="vl-key">You got</span><span>20 new patients</span></div>
+                    <div class="vl-row"><span class="vl-key">True cost, each</span><span>$176.56</span></div>
+                    <div class="vl-row"><span class="vl-key">A new patient is worth</span><span>$149.00</span></div>
+                </div>
+                <div class="verdict-final loss">
+                    <strong>Verdict: losing $27.56 on every new patient the ads brought in.</strong> Next to a $149 patient, the report's $106 made things look profitable. Add the $1,408 fee back in, and every single conversion cost more than it was worth. This is the number that shocked John — his words are below.
+                </div>
+            </div>
+        </div>
+
+        <div class="case-stats">
+            <div class="stat-card">
+                <div class="st-num st-red">$1,408/mo</div>
+                <div class="st-label">The management fee their monthly report never mentioned</div>
+            </div>
+            <div class="stat-card">
+                <div class="st-num st-red">−$27.56</div>
+                <div class="st-label">Lost on every new patient — while the report said everything was fine</div>
+            </div>
+            <div class="stat-card">
+                <div class="st-num st-teal">60 sec</div>
+                <div class="st-label">How long the audit took — two files, dragged and dropped</div>
+            </div>
+        </div>
+
+        <figure class="testimonial">
+            <blockquote>When the Hapawire team shared their findings and walked me through what it all meant, I was shocked and in disbelief. One, the lost investment — but really, the honesty with which they presented the data. Just cut and dry. So thankful for the Unspun audit tool and happy to watch its continued growth.</blockquote>
+            <figcaption class="testimonial-attr">
+                <strong>John</strong> · Owner, MindBody Med, Seattle
+                <span class="verified">Verified client</span>
+            </figcaption>
+        </figure>
+    </section>
+
+    <!-- DEMO PLAYER -->
+    <section class="section" id="demo">
+        <p class="section-label">Watch it work</p>
+        <h2>The whole audit, <em>start to finish.</em></h2>
+        <p class="section-intro">This is the exact flow, running on MindBody Med's real numbers. Press play — or click any chapter to jump around.</p>
+
+        <div class="player">
+            <div class="player-chrome">
+                <span class="pc-dot"></span><span class="pc-dot"></span><span class="pc-dot"></span>
+                <span class="pc-url">unspun.report — your audit</span>
+            </div>
+            <div class="player-stage" id="dp-stage">
+
+                <div class="dp-scene" data-dur="5500">
+                    <p class="dp-kicker">Step 1 · Upload</p>
+                    <h3>Drop in two files.</h3>
+                    <div class="dp-dropzone">
+                        Your agency invoice + your monthly ads report
+                        <div class="dp-files">
+                            <span class="dp-file">invoice_march.pdf</span>
+                            <span class="dp-file">google_ads_report.pdf</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dp-scene" data-dur="5500">
+                    <p class="dp-kicker">Step 2 · Reading</p>
+                    <h3>Unspun reads them in your browser.</h3>
+                    <div class="dp-bar"><div class="dp-bar-fill"></div></div>
+                    <div class="dp-parse-log">
+                        <div><span class="ok">✓</span> Found agency fee on invoice — $1,408.00</div>
+                        <div><span class="ok">✓</span> Found Google Ads totals — $2,123.25 · 225 clicks · 20 conversions</div>
+                        <div><span class="ok">✓</span> Nothing uploaded. Nothing stored.</div>
+                    </div>
+                </div>
+
+                <div class="dp-scene" data-dur="6500">
+                    <p class="dp-kicker">Step 3 · The money</p>
+                    <h3>What you actually paid.</h3>
+                    <div class="dp-lines">
+                        <div class="dp-line"><span class="dp-key">Agency management fee</span><span class="dp-val">$1,408.00</span></div>
+                        <div class="dp-line"><span class="dp-key">Google Ads spend</span><span class="dp-val">$2,123.25</span></div>
+                        <div class="dp-line dp-total"><span class="dp-key">Total out the door</span><span class="dp-val">$3,531.25</span></div>
+                    </div>
+                </div>
+
+                <div class="dp-scene" data-dur="7000">
+                    <p class="dp-kicker">Step 4 · The return</p>
+                    <h3>What you got for it.</h3>
+                    <div class="dp-lines">
+                        <div class="dp-line"><span class="dp-key">Times your ad was shown</span><span class="dp-val">3,670</span></div>
+                        <div class="dp-line"><span class="dp-key">People who clicked</span><span class="dp-val">225 ($9.44 each)</span></div>
+                        <div class="dp-line"><span class="dp-key">New patients</span><span class="dp-val teal">20</span></div>
+                        <div class="dp-line dp-total"><span class="dp-key">True cost per patient</span><span class="dp-val">$176.56</span></div>
+                    </div>
+                </div>
+
+                <div class="dp-scene" data-dur="7000">
+                    <p class="dp-kicker">Step 5 · The verdict</p>
+                    <h3>Making money, or losing it?</h3>
+                    <div class="dp-lines" style="margin-bottom:14px;">
+                        <div class="dp-line"><span class="dp-key">A new patient is worth</span><span class="dp-val">$149.00</span></div>
+                    </div>
+                    <div class="dp-verdict-box loss">
+                        <span class="big">−$27.56 per patient</span>
+                        Losing money on every single new patient — and nothing in the agency's report even hinted at it.
+                    </div>
+                </div>
+
+                <div class="dp-scene" data-dur="6000">
+                    <div class="dp-endcard">
+                        <p class="dp-kicker">That's it</p>
+                        <h3>Your turn. Same 60 seconds.</h3>
+                        <p>First audit free · no card · your files never leave your browser</p>
+                        <a href="#tool" class="btn-primary">Run my free audit</a>
+                    </div>
+                </div>
+
+            </div>
+            <div class="player-controls">
+                <button class="dp-play" id="dp-play" aria-label="Play demo">▶</button>
+                <div class="dp-steps" id="dp-steps"></div>
+                <span class="dp-time" id="dp-time">0:00 / 0:38</span>
+            </div>
+        </div>
+        <p class="player-caption">Interactive walkthrough of a real audit — or <a href="#tool" onclick="window.runDemo && setTimeout(runDemo, 400)" style="color:var(--teal-deep); font-weight:600;">open the live sample</a> in the tool itself.</p>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section" id="how-it-works">
+        <p class="section-label">How it works</p>
+        <h2>Three steps. No spreadsheets. <em>No expertise required.</em></h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <h3>Drop in your reports</h3>
+                <p>Your agency invoice and your monthly Google Ads or Meta Ads report. PDF or CSV — both work.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <h3>We read the numbers</h3>
+                <p>Unspun pulls out the only figures that matter: what you spent, what you got, and what it actually cost per customer.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <h3>See the real picture</h3>
+                <p>A plain-English breakdown, a profit/loss verdict, and a glossary so you can ask your agency better questions.</p>
+            </div>
+        </div>
+
         <div class="pain-grid">
             <div class="pain-card">
                 <p class="quote">"I get a report every month but I honestly have no idea if the ads are working or not."</p>
-                <p class="attribution">— Restaurant owner, running $2k/mo in Google Ads</p>
+                <p class="attribution">— Restaurant owner, $2k/mo in Google Ads</p>
             </div>
             <div class="pain-card">
                 <p class="quote">"My agency shows me impressions going up but my phone isn't ringing any more than before."</p>
-                <p class="attribution">— HVAC contractor, paying $1,400/mo agency fee</p>
+                <p class="attribution">— HVAC contractor, $1,400/mo agency fee</p>
             </div>
             <div class="pain-card">
-                <p class="quote">"I asked them to explain the report and they sent me a longer, more confusing email."</p>
-                <p class="attribution">— Boutique owner, 18 months into an ad contract</p>
-            </div>
-            <div class="pain-card">
-                <p class="quote">"Our Facebook ads report is just a screenshot of some graphs going up. I have no idea what any of it means for my bottom line."</p>
+                <p class="quote">"Our Facebook ads report is just a screenshot of graphs going up. No idea what it means for my bottom line."</p>
                 <p class="attribution">— Salon owner, running Meta ads</p>
             </div>
         </div>
     </section>
-
-    <!-- HOW IT WORKS -->
-    <div class="how-bg" id="how-it-works">
-        <section class="section">
-            <p class="section-label">How it works</p>
-            <h2>Three steps. No spreadsheets.<br>No expertise required.</h2>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-num">01</div>
-                    <h3>Upload your reports</h3>
-                    <p>Drop in your agency invoice and your monthly Google Ads or Meta Ads report. PDF or CSV — both work.</p>
-                </div>
-                <div class="step">
-                    <div class="step-num">02</div>
-                    <h3>We read the numbers</h3>
-                    <p>Unspun pulls out the only figures that matter: what you spent, what you got, and what it actually cost per customer.</p>
-                </div>
-                <div class="step">
-                    <div class="step-num">03</div>
-                    <h3>See the real picture</h3>
-                    <p>Plain-English breakdown, a profit/loss calculator, and a glossary so you can ask better questions next time.</p>
-                </div>
-            </div>
-        </section>
-    </div>
-
     <!-- TOOL -->
     <section class="section" id="tool">
         <div class="tool-header">
@@ -611,6 +1409,9 @@
                 <input type="number" class="pl-input" id="value" value="300">
                 <button class="primary" onclick="calculate()" style="width:auto; margin-left:10px; padding:10px 20px;">Calculate</button></p>
                 <div id="result" style="font-size:19px; margin-top:8px; font-weight:bold"></div>
+                <div id="loss-cta" style="display:none; margin-top:14px; padding:14px 16px; background:rgba(255,123,107,0.08); border:1px solid rgba(255,123,107,0.4); border-radius:10px; font-size:14px; line-height:1.6;">
+                    <strong style="color:var(--text)">Found a problem? That's what this audit is for.</strong> The team behind Unspun helps owners fix exactly this — <a href="mailto:human@hapawire.com?subject=My%20Unspun%20audit%20found%20a%20problem" style="color:var(--teal); font-weight:600;">email them your audit</a> and get a straight answer.
+                </div>
                 <p style="font-size:13px; color:var(--muted); margin-top:10px;">Based on blended cost (ad spend + agency fee) per conversion.</p>
             </div>
 
@@ -634,67 +1435,213 @@
         </div>
     </section>
 
+
     <!-- PRICING -->
-    <div class="pricing-bg">
-        <section class="section" style="text-align:center;">
-            <p class="section-label">Pricing</p>
-            <h2>Simple. No subscription.</h2>
-            <p style="margin: 0 auto; max-width: 500px;">Pay once, use the audits whenever you need them — no expiry, no auto-renew.</p>
-            <div class="pricing-grid">
-                <div class="pricing-card">
-                    <div class="price"><sup>$</sup>79</div>
-                    <div class="price-desc">3 audits · $26.33 each</div>
-                    <ul class="pricing-features">
-                        <li>Upload PDF or CSV reports</li>
-                        <li>Full spend breakdown</li>
-                        <li>Profit / Loss calculator</li>
-                        <li>Plain-English glossary</li>
-                        <li>Shareable results link</li>
-                    </ul>
-                    <a data-pack="3" href="https://buy.stripe.com/7sYbJ03Ic3SDe4688PaEE02" class="primary" style="display:block; text-align:center; text-decoration:none;">Get 3 Audits — $79</a>
-                </div>
-                <div class="pricing-card featured">
-                    <div class="pricing-badge">Most popular</div>
-                    <div class="price"><sup>$</sup>139</div>
-                    <div class="price-desc">6 audits · $23.17 each</div>
-                    <ul class="pricing-features">
-                        <li>Everything in the 3-pack</li>
-                        <li>Best per-audit rate for one business</li>
-                        <li>Enough to compare multiple agency quotes</li>
-                    </ul>
-                    <a data-pack="6" href="https://buy.stripe.com/bJe4gy7Ys74P1hk2OvaEE01" class="primary" style="display:block; text-align:center; text-decoration:none;">Get 6 Audits — $139</a>
-                </div>
-                <div class="pricing-card">
-                    <div class="price"><sup>$</sup>179</div>
-                    <div class="price-desc">9 audits · $19.89 each</div>
-                    <ul class="pricing-features">
-                        <li>Everything in the 6-pack</li>
-                        <li>Lowest per-audit rate</li>
-                        <li>Multiple locations or ongoing check-ins</li>
-                    </ul>
-                    <a data-pack="9" href="https://buy.stripe.com/bJe9ASemQ0Gre4660HaEE03" class="primary" style="display:block; text-align:center; text-decoration:none;">Get 9 Audits — $179</a>
-                </div>
+    <section class="section" id="pricing">
+        <p class="section-label">Pricing</p>
+        <h2>Pay once. <em>No subscription.</em></h2>
+        <p class="section-intro" style="margin: 0 auto;">Your first audit is free. After that, buy audits in packs — use them whenever you need them, no expiry, no auto-renew.</p>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <div class="price"><sup>$</sup>79</div>
+                <div class="price-desc">3 audits · $26.33 each</div>
+                <ul class="pricing-features">
+                    <li>Upload PDF or CSV reports</li>
+                    <li>Google Ads &amp; Meta Ads</li>
+                    <li>Full spend breakdown</li>
+                    <li>Profit / loss verdict</li>
+                    <li>Plain-English glossary</li>
+                </ul>
+                <a data-pack="3" href="https://buy.stripe.com/7sYbJ03Ic3SDe4688PaEE02" class="primary">Get 3 audits — $79</a>
             </div>
-            <p style="font-size:13px; color:var(--muted); margin-top:24px;">First audit is always free. No card required.</p>
-        </section>
-    </div>
+            <div class="pricing-card featured">
+                <div class="pricing-badge">Most popular</div>
+                <div class="price"><sup>$</sup>139</div>
+                <div class="price-desc">6 audits · $23.17 each</div>
+                <ul class="pricing-features">
+                    <li>Everything in the 3-pack</li>
+                    <li>Best rate for one business</li>
+                    <li>Enough to compare agency quotes</li>
+                </ul>
+                <a data-pack="6" href="https://buy.stripe.com/bJe4gy7Ys74P1hk2OvaEE01" class="primary">Get 6 audits — $139</a>
+            </div>
+            <div class="pricing-card">
+                <div class="price"><sup>$</sup>179</div>
+                <div class="price-desc">9 audits · $19.89 each</div>
+                <ul class="pricing-features">
+                    <li>Everything in the 6-pack</li>
+                    <li>Lowest per-audit rate</li>
+                    <li>Multiple locations or monthly check-ins</li>
+                </ul>
+                <a data-pack="9" href="https://buy.stripe.com/bJe9ASemQ0Gre4660HaEE03" class="primary">Get 9 audits — $179</a>
+            </div>
+        </div>
+        <p class="pricing-note">First audit is always free. No card required.</p>
+    </section>
 
     <!-- REFERRAL -->
-    <section class="section" style="text-align:center; max-width:620px;">
+    <section class="section" id="referral">
         <p class="section-label">Referral program</p>
-        <h2>Know another business owner in the dark?</h2>
-        <p style="margin: 0 auto 32px;">Send them your referral link. When they run their first paid audit, you get <strong style="color:var(--teal)">$10 credit</strong> toward your next pack. They get <strong style="color:var(--teal)">$5 off</strong> theirs.</p>
-        <button class="primary" style="max-width:320px; margin:0 auto;" onclick="alert('Referral link generated!\n\nhttps://unspun.report/ref/YOURCODE123\n\nShare this with other small business owners running Google or Meta ads.')">Generate My Referral Link</button>
+        <h2>Know another owner <em>in the dark?</em></h2>
+        <p class="section-intro" style="margin: 0 auto 32px;">Send them your referral link. When they run their first paid audit, you get <strong style="color:var(--teal-deep)">$10 credit</strong> toward your next pack. They get <strong style="color:var(--teal-deep)">$5 off</strong> theirs.</p>
+        <button class="btn-primary" onclick="alert('Referral link generated!\n\nhttps://unspun.report/ref/YOURCODE123\n\nShare this with other small business owners running Google or Meta ads.')">Generate my referral link</button>
     </section>
 
     <!-- FOOTER -->
     <footer>
-        <p style="font-size:16px; font-weight:700; color:var(--teal); margin-bottom:8px;">unspun</p>
-        <p>Your money. Their jargon. Our translation.</p>
-        <p style="margin-top:16px;"><a href="mailto:support@unspun.report">support@unspun.report</a></p>
-        <p style="margin-top:20px; font-size:12px;">© 2025 Unspun. Your files are processed in your browser and never stored. &nbsp;·&nbsp; <a href="/privacy.html">Privacy Policy</a></p>
-        <p style="margin-top:8px; font-size:12px; color:#3a4a5a;">Powered by <a href="https://hapawire.com" target="_blank">Hapawire</a></p>
+        <p class="f-logo">unspun<span>.</span></p>
+        <p class="f-tag">Your money. Their jargon. Our translation.</p>
+        <p style="margin-top:18px;"><a href="mailto:support@unspun.report">support@unspun.report</a></p>
+        <p class="f-fine">© 2026 Unspun. Your files are processed in your browser and never stored. &nbsp;·&nbsp; <a href="/privacy.html">Privacy Policy</a> &nbsp;·&nbsp; Powered by <a href="https://hapawire.com" target="_blank">Hapawire</a></p>
     </footer>
+
+    <!-- Demo player: self-contained presentational walkthrough. Independent of the
+         product logic in the module script below — it only reads dp-* elements. -->
+    <script>
+    (function () {
+        const stage = document.getElementById('dp-stage');
+        if (!stage) return;
+        const scenes = Array.from(stage.querySelectorAll('.dp-scene'));
+        const stepsWrap = document.getElementById('dp-steps');
+        const playBtn = document.getElementById('dp-play');
+        const timeEl = document.getElementById('dp-time');
+        const durations = scenes.map(s => parseInt(s.dataset.dur, 10) || 6000);
+        const totalMs = durations.reduce((a, b) => a + b, 0);
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // one progress segment per scene
+        const fills = scenes.map((_, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'dp-step';
+            btn.setAttribute('aria-label', 'Go to step ' + (i + 1));
+            const fill = document.createElement('span');
+            fill.className = 'dp-step-fill';
+            btn.appendChild(fill);
+            btn.addEventListener('click', () => { goTo(i); play(); });
+            stepsWrap.appendChild(btn);
+            return fill;
+        });
+        const stepBtns = Array.from(stepsWrap.children);
+
+        let current = -1;
+        let playing = false;
+        let advanceTimer = null;
+        let sceneStartedAt = 0;   // performance.now() when current scene (re)started
+        let remaining = 0;        // ms left in current scene (used across pause/resume)
+        let ticker = null;
+
+        function fmt(ms) {
+            const s = Math.max(0, Math.round(ms / 1000));
+            return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+        }
+
+        function elapsedMs() {
+            if (current < 0) return 0;
+            const prior = durations.slice(0, current).reduce((a, b) => a + b, 0);
+            const inScene = playing ? (performance.now() - sceneStartedAt) : (durations[current] - remaining);
+            return prior + Math.min(inScene, durations[current]);
+        }
+
+        function updateTime() { timeEl.textContent = fmt(elapsedMs()) + ' / ' + fmt(totalMs); }
+
+        function setFill(i, widthPct, transitionMs) {
+            const f = fills[i];
+            f.style.transition = transitionMs > 0 ? 'width ' + transitionMs + 'ms linear' : 'none';
+            f.style.width = widthPct + '%';
+        }
+
+        function goTo(i) {
+            clearTimeout(advanceTimer);
+            current = i;
+            remaining = durations[i];
+            scenes.forEach((s, k) => s.classList.toggle('active', k === i));
+            stepBtns.forEach((b, k) => {
+                b.classList.toggle('done', k < i);
+                b.classList.remove('current');
+            });
+            stepBtns[i].classList.add('current');
+            fills.forEach((f, k) => setFill(k, k < i ? 100 : 0, 0));
+            // restart scene-internal CSS animations
+            const scene = scenes[i];
+            scene.classList.remove('active');
+            void scene.offsetWidth;
+            scene.classList.add('active');
+            updateTime();
+        }
+
+        function scheduleAdvance(ms) {
+            clearTimeout(advanceTimer);
+            advanceTimer = setTimeout(() => {
+                if (current < scenes.length - 1) {
+                    goTo(current + 1);
+                    runScene();
+                } else {
+                    stop(true);
+                }
+            }, ms);
+        }
+
+        function runScene() {
+            sceneStartedAt = performance.now();
+            void fills[current].offsetWidth;
+            setFill(current, 100, remaining);
+            scheduleAdvance(remaining);
+        }
+
+        function play() {
+            if (current < 0 || (current === scenes.length - 1 && remaining <= 60)) goTo(0);
+            playing = true;
+            playBtn.textContent = '❚❚';
+            playBtn.setAttribute('aria-label', 'Pause demo');
+            runScene();
+            clearInterval(ticker);
+            ticker = setInterval(updateTime, 250);
+        }
+
+        function pause() {
+            playing = false;
+            playBtn.textContent = '▶';
+            playBtn.setAttribute('aria-label', 'Play demo');
+            clearTimeout(advanceTimer);
+            clearInterval(ticker);
+            const spent = performance.now() - sceneStartedAt;
+            remaining = Math.max(0, remaining - spent);
+            // freeze the fill where it is
+            const pct = 100 * (1 - remaining / durations[current]);
+            setFill(current, pct, 0);
+            updateTime();
+        }
+
+        function stop(atEnd) {
+            playing = false;
+            clearTimeout(advanceTimer);
+            clearInterval(ticker);
+            playBtn.textContent = atEnd ? '⟳' : '▶';
+            playBtn.setAttribute('aria-label', atEnd ? 'Replay demo' : 'Play demo');
+            if (atEnd) { remaining = 0; fills.forEach((f, k) => setFill(k, 100, 0)); updateTime(); }
+        }
+
+        playBtn.addEventListener('click', () => { playing ? pause() : play(); });
+
+        // show the first scene immediately so the stage is never blank
+        goTo(0);
+
+        // autoplay once when the player scrolls into view (skip for reduced motion)
+        if (!reducedMotion && 'IntersectionObserver' in window) {
+            let played = false;
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(e => {
+                    if (e.isIntersecting && !played) {
+                        played = true;
+                        play();
+                        io.disconnect();
+                    }
+                });
+            }, { threshold: 0.45 });
+            io.observe(stage);
+        }
+    })();
+    </script>
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
@@ -1106,12 +2053,15 @@
             if (blended == null) return;
             const pl = value - blended;
             const resultDiv = document.getElementById('result');
+            const lossCta = document.getElementById('loss-cta');
             if (pl > 0) {
                 resultDiv.innerHTML = `Direct P/L: +$${pl.toFixed(2)} per conversion — You're making money.`;
                 resultDiv.style.color = 'var(--green)';
+                if (lossCta) lossCta.style.display = 'none';
             } else {
                 resultDiv.innerHTML = `Direct P/L: -$${Math.abs(pl).toFixed(2)} per conversion — You're losing money on these conversions.`;
                 resultDiv.style.color = 'var(--red)';
+                if (lossCta) lossCta.style.display = 'block';
             }
         }
 
