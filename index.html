@@ -1409,6 +1409,9 @@
                 <input type="number" class="pl-input" id="value" value="300">
                 <button class="primary" onclick="calculate()" style="width:auto; margin-left:10px; padding:10px 20px;">Calculate</button></p>
                 <div id="result" style="font-size:19px; margin-top:8px; font-weight:bold"></div>
+                <div id="loss-cta" style="display:none; margin-top:14px; padding:14px 16px; background:rgba(255,123,107,0.08); border:1px solid rgba(255,123,107,0.4); border-radius:10px; font-size:14px; line-height:1.6;">
+                    <strong style="color:var(--text)">Found a problem? That's what this audit is for.</strong> The team behind Unspun helps owners fix exactly this — <a href="mailto:human@hapawire.com?subject=My%20Unspun%20audit%20found%20a%20problem" style="color:var(--teal); font-weight:600;">email them your audit</a> and get a straight answer.
+                </div>
                 <p style="font-size:13px; color:var(--muted); margin-top:10px;">Based on blended cost (ad spend + agency fee) per conversion.</p>
             </div>
 
@@ -2050,12 +2053,15 @@
             if (blended == null) return;
             const pl = value - blended;
             const resultDiv = document.getElementById('result');
+            const lossCta = document.getElementById('loss-cta');
             if (pl > 0) {
                 resultDiv.innerHTML = `Direct P/L: +$${pl.toFixed(2)} per conversion — You're making money.`;
                 resultDiv.style.color = 'var(--green)';
+                if (lossCta) lossCta.style.display = 'none';
             } else {
                 resultDiv.innerHTML = `Direct P/L: -$${Math.abs(pl).toFixed(2)} per conversion — You're losing money on these conversions.`;
                 resultDiv.style.color = 'var(--red)';
+                if (lossCta) lossCta.style.display = 'block';
             }
         }
 
