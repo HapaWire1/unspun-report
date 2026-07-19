@@ -798,8 +798,8 @@
         /* ══ DARK LEDGER PANEL: the tool itself ══
            The markup inside #tool is untouched working product code — these styles
            re-skin it as the dark in-app panel sitting on the paper page. */
+        section[id], #tool { scroll-margin-top: 76px; }
         #tool {
-            scroll-margin-top: 80px;
             max-width: 1000px;
             background: var(--bg);
             border: 1px solid var(--border);
@@ -1079,6 +1079,62 @@
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
             .dp-scene, .dp-file, .dp-line, .dp-verdict-box, .dp-bar-fill, .dp-parse-log div { transition: none !important; }
+        }
+        /* ── PAST AUDITS ── */
+        #past-audits { margin-top: 34px; border-top: 1px solid var(--border); padding-top: 26px; }
+        .pa-title { font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--paper-hi); margin-bottom: 14px; }
+        .pa-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+            width: 100%;
+            text-align: left;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .pa-row:hover { border-color: var(--teal); }
+        .pa-row .pa-date { color: var(--muted); }
+        .pa-row .pa-loss { color: var(--red); }
+        .pa-row .pa-win { color: var(--green); }
+
+        /* ── REPORT ACTIONS ── */
+        .report-actions { display: flex; justify-content: flex-end; margin-bottom: 6px; }
+        .report-actions button {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 7px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .report-actions button:hover { border-color: var(--teal); color: var(--teal); }
+
+        /* ── PRINT: only the audit report, on paper colors ── */
+        @media print {
+            body * { visibility: hidden; }
+            #report, #report * { visibility: visible; }
+            #report { position: absolute; top: 0; left: 0; width: 100%; }
+            .demo-banner, .report-actions, #loss-cta, #report .primary { display: none !important; }
+            #report .box {
+                background: #fff !important;
+                border: 1px solid #ccc !important;
+                border-left: 3px solid #0A7C66 !important;
+                page-break-inside: avoid;
+            }
+            #report, #report .box, #report .box p, #report .box h2, #report span, #report td, #report th, #report strong {
+                color: #111 !important;
+            }
+            #report th { background: #eee !important; }
+            #report .highlight { color: #0A7C66 !important; }
         }
     </style>
     <script defer src="/_vercel/insights/script.js"></script>
@@ -1387,6 +1443,10 @@
                 <strong>This is a sample audit</strong> — example numbers from a typical small business running Google Ads through an agency. <a href="#tool" onclick="exitDemo()">Sign in to run yours — your first audit is free, no card required.</a>
             </div>
 
+            <div class="report-actions">
+                <button onclick="window.print()" aria-label="Print or save this audit as a PDF">🖨&nbsp; Print / save as PDF</button>
+            </div>
+
             <div class="box">
                 <h2>Your Marketing Spend Breakdown</h2>
                 <p><strong>Agency Fee</strong>: $<span id="r-agency-fee">—</span></p>
@@ -1433,6 +1493,11 @@
                 </table>
             </div>
 
+        </div>
+
+        <div id="past-audits" style="display:none">
+            <h3 class="pa-title">Your past audits</h3>
+            <div id="past-audits-list"></div>
         </div>
     </section>
 
@@ -1653,6 +1718,11 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFseHF0bXFzamNrcmFnbnNid3F3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDU3MDMsImV4cCI6MjA5MTY4MTcwM30._SklOQMaFThiIWlhfhFa9MmDqqrxDSiEohJtEjFsR_w';
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // Capture ?ref= before auth — visitors usually sign in after landing, so stash
+        // the code and attribute it to the profile on first sign-in (see onSignedIn).
+        const refParam = new URLSearchParams(location.search).get('ref');
+        if (refParam && /^[a-z0-9]{1,16}$/i.test(refParam)) localStorage.setItem('unspun_ref', refParam.toLowerCase());
+
         let currentUser = null;
         let currentCredits = 0;
 
@@ -1670,7 +1740,7 @@
             currentUser = user;
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('audit_credits')
+                .select('audit_credits, referred_by')
                 .eq('id', user.id)
                 .single();
             currentCredits = profile?.audit_credits ?? 0;
@@ -1686,6 +1756,55 @@
                 document.getElementById('tool-inner').style.display = 'none';
                 document.getElementById('no-credits-gate').style.display = 'block';
             }
+
+            // Referral attribution: if this account arrived via a ?ref= link (captured
+            // below, pre-auth) and has no referrer yet, record it once. Reward logic is
+            // handled at purchase time, server-side — this only records who sent them.
+            const pendingRef = localStorage.getItem('unspun_ref');
+            if (pendingRef && profile && !profile.referred_by) {
+                await supabase.from('profiles').update({ referred_by: pendingRef }).eq('id', user.id);
+                localStorage.removeItem('unspun_ref');
+            }
+
+            loadPastAudits();
+        }
+
+        // Past audits, rendered from the user's own audit_metrics rows (own-row RLS).
+        // Clicking a row re-renders that audit into the report — no credit consumed;
+        // they already paid for it when it ran.
+        async function loadPastAudits() {
+            const wrap = document.getElementById('past-audits');
+            const list = document.getElementById('past-audits-list');
+            if (!wrap || !list || !currentUser) return;
+            const { data: rows } = await supabase
+                .from('audit_metrics')
+                .select('created_at, agency_fee, ad_spend, impressions, clicks, conversions, cpc, cost_per_conversion, blended_cost_per_conversion')
+                .eq('user_id', currentUser.id)
+                .order('created_at', { ascending: false })
+                .limit(10);
+            if (!rows || rows.length === 0) { wrap.style.display = 'none'; return; }
+            list.innerHTML = '';
+            rows.forEach(r => {
+                const btn = document.createElement('button');
+                btn.className = 'pa-row';
+                const d = new Date(r.created_at);
+                const total = (r.agency_fee || 0) + (r.ad_spend || 0);
+                btn.innerHTML = '<span class="pa-date">' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + '</span>'
+                    + '<span>$' + total.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' spent</span>'
+                    + '<span>' + (r.conversions ?? '—') + ' conversions</span>'
+                    + '<span>' + (r.blended_cost_per_conversion != null ? '$' + Number(r.blended_cost_per_conversion).toFixed(2) + ' each' : '—') + '</span>';
+                btn.addEventListener('click', () => {
+                    demoActive = false;
+                    data.agencyFee = r.agency_fee; data.adSpend = r.ad_spend;
+                    data.impressions = r.impressions; data.clicks = r.clicks;
+                    data.conversions = r.conversions; data.cpc = r.cpc;
+                    data.costPerConversion = r.cost_per_conversion;
+                    displayReport();
+                    document.getElementById('report').scrollIntoView({ behavior: 'smooth' });
+                });
+                list.appendChild(btn);
+            });
+            wrap.style.display = 'block';
         }
 
         function onSignedOut() {
@@ -1697,6 +1816,7 @@
             document.getElementById('tool-inner').style.display = 'none';
             document.getElementById('no-credits-gate').style.display = 'none';
             document.getElementById('report').style.display = 'none';
+            document.getElementById('past-audits').style.display = 'none';
         }
 
         async function signIn() {
@@ -1754,6 +1874,7 @@
                 cost_per_conversion: data.costPerConversion,
                 blended_cost_per_conversion: window._blended ?? null
             });
+            loadPastAudits();
         }
 
         // ── pdf.js ─────────────────────────────────────────────────────────────
@@ -1787,16 +1908,20 @@
             const fileListEl = document.getElementById('file-list');
             fileListEl.innerHTML = '';
 
+            const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10MB — agency reports are never this big
             for (const file of files) {
                 const item = document.createElement('div');
                 item.className = 'file-item';
                 item.textContent = '⏳ ' + file.name;
                 fileListEl.appendChild(item);
                 try {
+                    if (file.size > MAX_FILE_BYTES) throw new Error('over 10MB — export just the monthly summary instead of the full account history');
+                    if (file.size === 0) throw new Error('empty file');
                     const ext = file.name.split('.').pop().toLowerCase();
                     if (ext === 'pdf') await parsePDF(file);
                     else if (ext === 'csv') { const text = await file.text(); parseCSV(text); }
-                    else throw new Error('Unsupported file type');
+                    else if (ext === 'xlsx' || ext === 'xls') throw new Error('Excel files aren\'t supported yet — re-export as CSV (File → Download → CSV in most tools)');
+                    else throw new Error('unsupported file type — PDF or CSV only');
                     item.className = 'file-item parsed';
                     item.textContent = '✓ ' + file.name;
                 } catch (err) {
@@ -1842,6 +1967,7 @@
             const fullText = pages.join('\n');
             if (looksLikeInvoice(fullText)) parseInvoiceText(fullText);
             if (looksLikeReport(fullText)) parseReportText(pages);
+            else if (looksLikeMetaReport(fullText)) parseMetaReportText(fullText);
         }
 
         function reconstructPageText(items) {
@@ -1860,6 +1986,36 @@
 
         function looksLikeInvoice(text) { return /RECEIPT|INVOICE|STATEMENT|BILL/i.test(text) && /TOTAL|AMOUNT DUE|BALANCE DUE/i.test(text); }
         function looksLikeReport(text) { return /Google Ads/i.test(text) && /Impressions/i.test(text) && /Conversions/i.test(text); }
+        function looksLikeMetaReport(text) { return /(Meta Ads|Facebook Ads|Ads Manager|Ads Reporting)/i.test(text) && /(Amount Spent|Results|Reach|Impressions)/i.test(text); }
+
+        // Meta's PDF exports are label/value pairs rather than one wide table row, so this
+        // pulls each metric with its own pattern and takes whatever subset it finds. Anything
+        // missing still flows through the existing fallbacks (manual fee entry, derived CPC).
+        function parseMetaReportText(text) {
+            const grab = (patterns) => {
+                for (const p of patterns) {
+                    const m = text.match(p);
+                    if (m) return parseNum(m[1]);
+                }
+                return null;
+            };
+            const spend = grab([/Amount\s+Spent[^\d$]{0,20}\$?([\d,]+\.?\d*)/i, /Total\s+Spent[^\d$]{0,20}\$?([\d,]+\.?\d*)/i]);
+            const impressions = grab([/Impressions[^\d]{0,20}([\d,]+)/i]);
+            const clicks = grab([/Link\s+Clicks[^\d]{0,20}([\d,]+)/i, /Clicks\s*\(all\)[^\d]{0,20}([\d,]+)/i]);
+            const conversions = grab([/Results[^\d]{0,20}([\d,]+)/i, /Conversions[^\d]{0,20}([\d,]+)/i, /Purchases[^\d]{0,20}([\d,]+)/i, /Leads[^\d]{0,20}([\d,]+)/i]);
+            const cpc = grab([/CPC[^\d$]{0,30}\$?([\d.]+)/i, /Cost\s+per\s+Link\s+Click[^\d$]{0,20}\$?([\d.]+)/i]);
+            const costPerConv = grab([/Cost\s+per\s+Result[^\d$]{0,20}\$?([\d,]+\.?\d*)/i]);
+            if (spend == null && conversions == null) return; // not enough signal — leave data untouched
+            data.platform = 'meta';
+            if (spend != null) data.adSpend = spend;
+            if (impressions != null) data.impressions = impressions;
+            if (clicks != null) data.clicks = clicks;
+            if (conversions != null) data.conversions = conversions;
+            if (cpc != null) data.cpc = cpc;
+            if (costPerConv != null) data.costPerConversion = costPerConv;
+            if (data.adSpend && data.conversions && !data.costPerConversion) data.costPerConversion = data.adSpend / data.conversions;
+            if (data.adSpend && data.clicks && !data.cpc) data.cpc = data.adSpend / data.clicks;
+        }
 
         // Tries each common "how much do I owe" label in turn — agencies phrase this differently
         // (TOTAL, AMOUNT DUE, BALANCE DUE, GRAND TOTAL) and the original single-pattern match
