@@ -83,7 +83,7 @@
         .logo::after { content: '.'; color: var(--teal-deep); }
         .nav-links {
             display: flex;
-            gap: 28px;
+            gap: 34px;
             align-items: center;
         }
         .nav-links a:not(.nav-cta) {
@@ -92,6 +92,7 @@
             color: var(--ink-soft);
             text-decoration: none;
         }
+        .nav-links .nav-cta { margin-left: 10px; }
         .nav-links a:not(.nav-cta):hover { color: var(--ink); }
         .nav-cta {
             background: var(--ink);
@@ -1076,12 +1077,17 @@
     <!-- NAV -->
     <nav>
         <a class="logo" href="#">unspun</a>
-        <div id="nav-signed-out" class="nav-links">
-            <a href="#real-audit">Real audit</a>
-            <a href="#demo">Demo</a>
-            <a href="#how-it-works">How it works</a>
-            <a href="#pricing">Pricing</a>
-            <a href="#tool" class="nav-cta">Run my free audit</a>
+        <!-- The product script toggles #nav-signed-out between display:none and
+             display:block — flex layout lives on the inner .nav-links so the
+             toggle can't flatten the link spacing. -->
+        <div id="nav-signed-out">
+            <div class="nav-links">
+                <a href="#real-audit">Real audit</a>
+                <a href="#demo">Demo</a>
+                <a href="#how-it-works">How it works</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#tool" class="nav-cta">Run my free audit</a>
+            </div>
         </div>
         <div id="nav-signed-in" class="user-bar" style="display:none">
             <span class="credit-pill" id="nav-credits">— audits</span>
