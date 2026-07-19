@@ -451,6 +451,11 @@
             line-height: 1.65;
         }
         .verdict-final strong { color: var(--teal); }
+        .verdict-final.loss {
+            background: rgba(255, 123, 107, 0.09);
+            border-color: rgba(255, 123, 107, 0.5);
+        }
+        .verdict-final.loss strong { color: var(--red); }
         .case-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1130,7 +1135,7 @@
                     TRUE COST PER PATIENT
                     <span class="rc-big">$176.56</span>
                 </div>
-                <div class="rc-note">Their report said $106. It left out the fee.</div>
+                <div class="rc-note">A patient is worth $149. They were losing money on every one — and the report never showed it.</div>
             </div>
             <p class="receipt-caption">Real numbers, real business — <a href="#real-audit">see the full audit ↓</a></p>
         </div>
@@ -1171,10 +1176,10 @@
                     <div class="vl-row"><span class="vl-key">You paid, in total</span><span>$3,531.25</span></div>
                     <div class="vl-row"><span class="vl-key">You got</span><span>20 new patients</span></div>
                     <div class="vl-row"><span class="vl-key">True cost, each</span><span>$176.56</span></div>
-                    <div class="vl-row"><span class="vl-key">A patient is worth</span><span>~$300.00</span></div>
+                    <div class="vl-row"><span class="vl-key">A new patient is worth</span><span>$149.00</span></div>
                 </div>
-                <div class="verdict-final">
-                    <strong>Verdict: you're making about $123 per new patient — the ads are working.</strong> But 40% of your marketing dollar goes to the fee, and your true cost per patient is 66% higher than the report implies. Now you know what to ask your agency about.
+                <div class="verdict-final loss">
+                    <strong>Verdict: losing $27.56 on every new patient the ads brought in.</strong> Next to a $149 patient, the report's $106 made things look profitable. Add the $1,408 fee back in, and every single conversion cost more than it was worth. This is the number that shocked John — his words are below.
                 </div>
             </div>
         </div>
@@ -1185,8 +1190,8 @@
                 <div class="st-label">The management fee their monthly report never mentioned</div>
             </div>
             <div class="stat-card">
-                <div class="st-num">66%</div>
-                <div class="st-label">How much higher the true cost per patient was vs. the report's number</div>
+                <div class="st-num st-red">−$27.56</div>
+                <div class="st-label">Lost on every new patient — while the report said everything was fine</div>
             </div>
             <div class="stat-card">
                 <div class="st-num st-teal">60 sec</div>
@@ -1255,8 +1260,8 @@
                     <div class="dp-lines">
                         <div class="dp-line"><span class="dp-key">Times your ad was shown</span><span class="dp-val">3,670</span></div>
                         <div class="dp-line"><span class="dp-key">People who clicked</span><span class="dp-val">225 ($9.44 each)</span></div>
-                        <div class="dp-line"><span class="dp-key">New customers</span><span class="dp-val teal">20</span></div>
-                        <div class="dp-line dp-total"><span class="dp-key">True cost per customer</span><span class="dp-val">$176.56</span></div>
+                        <div class="dp-line"><span class="dp-key">New patients</span><span class="dp-val teal">20</span></div>
+                        <div class="dp-line dp-total"><span class="dp-key">True cost per patient</span><span class="dp-val">$176.56</span></div>
                     </div>
                 </div>
 
@@ -1264,11 +1269,11 @@
                     <p class="dp-kicker">Step 5 · The verdict</p>
                     <h3>Making money, or losing it?</h3>
                     <div class="dp-lines" style="margin-bottom:14px;">
-                        <div class="dp-line"><span class="dp-key">If your average customer is worth</span><span class="dp-val">$150.00</span></div>
+                        <div class="dp-line"><span class="dp-key">A new patient is worth</span><span class="dp-val">$149.00</span></div>
                     </div>
                     <div class="dp-verdict-box loss">
-                        <span class="big">−$26.56 per customer</span>
-                        You'd be losing money on every single new customer — and the agency's report would still look exactly this good.
+                        <span class="big">−$27.56 per patient</span>
+                        Losing money on every single new patient — and nothing in the agency's report even hinted at it.
                     </div>
                 </div>
 
