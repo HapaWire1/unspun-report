@@ -473,6 +473,57 @@
         .stat-card .st-num.st-teal { color: var(--teal-deep); }
         .stat-card .st-label { font-size: 13px; color: var(--ink-soft); margin-top: 6px; line-height: 1.5; }
 
+        /* ── TESTIMONIAL ── */
+        .testimonial {
+            margin-top: 26px;
+            background: var(--paper-hi);
+            border: 1px solid var(--paper-line);
+            border-left: 4px solid var(--teal-deep);
+            border-radius: 14px;
+            padding: 36px 40px 32px;
+            position: relative;
+            box-shadow: 0 12px 30px -22px rgba(22, 19, 13, 0.3);
+        }
+        .testimonial::before {
+            content: '\201C';
+            position: absolute;
+            top: 6px;
+            left: 22px;
+            font-family: var(--font-display);
+            font-size: 76px;
+            line-height: 1;
+            color: var(--teal-deep);
+            opacity: 0.22;
+        }
+        .testimonial blockquote {
+            font-family: var(--font-display);
+            font-style: italic;
+            font-weight: 500;
+            font-size: clamp(17px, 2.1vw, 21px);
+            line-height: 1.65;
+            color: var(--ink);
+            max-width: 64ch;
+        }
+        .testimonial-attr {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: var(--ink-soft);
+        }
+        .testimonial-attr strong { color: var(--ink); font-weight: 700; }
+        .testimonial-attr .verified {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--teal-deep);
+            border: 1px solid rgba(10, 124, 102, 0.35);
+            background: rgba(10, 124, 102, 0.07);
+            padding: 2px 10px;
+            border-radius: 999px;
+        }
+
         /* ── DEMO PLAYER ── */
         #demo { max-width: 980px; }
         .player {
@@ -1055,7 +1106,7 @@
             <div class="receipt" aria-label="Sample audit receipt based on a real business">
                 <div class="receipt-head">
                     <div class="rc-title">UNSPUN AUDIT</div>
-                    <div class="rc-sub">Wellness clinic · Seattle, WA · 1 month</div>
+                    <div class="rc-sub">MindBody Med · Seattle, WA · 1 month</div>
                 </div>
                 <div class="rc-row"><span>Agency management fee</span><span class="rc-val">$1,408.00</span></div>
                 <div class="rc-row"><span>Google Ads spend</span><span class="rc-val">$2,123.25</span></div>
@@ -1078,8 +1129,8 @@
     <section class="section" id="real-audit">
         <p class="section-label">A real audit</p>
         <h2>Their agency's report said <em>everything was fine.</em></h2>
-        <p class="section-intro">A Seattle wellness clinic doing about $1.3M a year was paying its agency every month — and had no idea whether any of it worked. This is what their monthly report looked like, and what Unspun found in it.</p>
-        <div class="case-attribution">Real client data · Google Ads · one month · shared with permission, name withheld</div>
+        <p class="section-intro">MindBody Med, a Seattle wellness clinic doing about $1.3M a year, was paying its agency every month — and had no idea whether any of it worked. This is what their monthly report looked like, and what Unspun found in it.</p>
+        <div class="case-attribution">Real client data · MindBody Med, Seattle · Google Ads · one month · shared with permission</div>
 
         <div class="case-grid">
             <div class="case-panel case-before">
@@ -1131,13 +1182,21 @@
                 <div class="st-label">How long the audit took — two files, dragged and dropped</div>
             </div>
         </div>
+
+        <figure class="testimonial">
+            <blockquote>When the Hapawire team shared their findings and walked me through what it all meant, I was shocked and in disbelief. One, the lost investment — but really, the honesty with which they presented the data. Just cut and dry. So thankful for the Unspun audit tool and happy to watch its continued growth.</blockquote>
+            <figcaption class="testimonial-attr">
+                <strong>John</strong> · Owner, MindBody Med, Seattle
+                <span class="verified">Verified client</span>
+            </figcaption>
+        </figure>
     </section>
 
     <!-- DEMO PLAYER -->
     <section class="section" id="demo">
         <p class="section-label">Watch it work</p>
         <h2>The whole audit, <em>start to finish.</em></h2>
-        <p class="section-intro">This is the exact flow, running on the clinic's real numbers. Press play — or click any chapter to jump around.</p>
+        <p class="section-intro">This is the exact flow, running on MindBody Med's real numbers. Press play — or click any chapter to jump around.</p>
 
         <div class="player">
             <div class="player-chrome">
