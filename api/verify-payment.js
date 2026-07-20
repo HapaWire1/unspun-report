@@ -79,5 +79,55 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to add credits', detail: err });
   }
 
+  // 6. Referral reward — +1 credit to whoever referred this buyer, once, on their first purchase.
+  // Best-effort: never let a referral hiccup block the buyer's own confirmed purchase.
+  try {
+    const profileRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}&select=referred_by,referral_reward_given`,
+      { headers: { Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`, apikey: SUPABASE_SERVICE_KEY } }
+    );
+    const [buyerProfile] = await profileRes.json();
+
+    if (buyerProfile?.referred_by && !buyerProfile.referral_reward_given) {
+      // Atomic claim: only proceeds if this row still says false, so a second purchase
+      // (or a race between two requests) can never grant the reward twice.
+      const claimRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}&referral_reward_given=eq.false`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+            apikey: SUPABASE_SERVICE_KEY,
+            'Content-Type': 'application/json',
+            Prefer: 'return=representation'
+          },
+          body: JSON.stringify({ referral_reward_given: true })
+        }
+      );
+      const claimed = await claimRes.json();
+
+      if (claimed.length > 0) {
+        const referrerRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/profiles?referral_code=eq.${encodeURIComponent(buyerProfile.referred_by)}&select=id`,
+          { headers: { Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`, apikey: SUPABASE_SERVICE_KEY } }
+        );
+        const [referrer] = await referrerRes.json();
+        if (referrer) {
+          await fetch(`${SUPABASE_URL}/rest/v1/rpc/increment_credits`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+              apikey: SUPABASE_SERVICE_KEY,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ user_id: referrer.id, amount: 1 })
+          });
+        }
+      }
+    }
+  } catch (_) {
+    // Referral reward is best-effort — the buyer's purchase above already succeeded.
+  }
+
   return res.status(200).json({ credits_added: creditsToAdd });
 }

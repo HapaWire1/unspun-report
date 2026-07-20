@@ -1515,6 +1515,7 @@
         <p class="section-label">Pricing</p>
         <h2>Pay once. <em>No subscription.</em></h2>
         <p class="section-intro" style="margin: 0 auto;">Your first audit is free. After that, buy audits in packs — use them whenever you need them, no expiry, no auto-renew.</p>
+        <p class="section-intro" id="referral-banner" style="display:none; margin: 12px auto 0; font-weight: 600; color: var(--teal-deep);">You were referred — enter code <strong>REF5</strong> at checkout for $5 off your first pack.</p>
         <div class="pricing-grid">
             <div class="pricing-card">
                 <div class="price"><sup>$</sup>79</div>
@@ -1731,6 +1732,11 @@
         const refParam = new URLSearchParams(location.search).get('ref');
         if (refParam && /^[a-z0-9]{1,16}$/i.test(refParam)) localStorage.setItem('unspun_ref', refParam.toLowerCase());
 
+        if (localStorage.getItem('unspun_ref')) {
+            const banner = document.getElementById('referral-banner');
+            if (banner) banner.style.display = 'block';
+        }
+
         let currentUser = null;
         let currentCredits = 0;
 
@@ -1773,6 +1779,12 @@
                 await supabase.from('profiles').update({ referred_by: pendingRef }).eq('id', user.id);
                 localStorage.removeItem('unspun_ref');
             }
+
+            // Show the $5-off banner for the life of the account, not just pre-signin —
+            // localStorage's unspun_ref is cleared above once attributed, but referred_by
+            // on the profile persists until they redeem it at checkout.
+            const referralBanner = document.getElementById('referral-banner');
+            if (referralBanner && (profile?.referred_by || pendingRef)) referralBanner.style.display = 'block';
 
             loadPastAudits();
         }
