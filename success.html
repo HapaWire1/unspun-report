@@ -44,6 +44,7 @@
   <footer>Unspun · <a href="mailto:support@unspun.report" style="color:var(--teal); text-decoration:none;">support@unspun.report</a></footer>
 
   <script>
+  (function () {
     const SUPABASE_URL = 'https://alxqtmqsjckragnsbwqw.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFseHF0bXFzamNrcmFnbnNid3F3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDU3MDMsImV4cCI6MjA5MTY4MTcwM30._SklOQMaFThiIWlhfhFa9MmDqqrxDSiEohJtEjFsR_w';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -90,6 +91,7 @@
     }
 
     init();
+  })();
   </script>
 </body>
 </html>
