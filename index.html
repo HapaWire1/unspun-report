@@ -1401,7 +1401,7 @@
     <!-- TOOL -->
     <section class="section" id="tool">
         <div class="tool-header">
-            <p class="section-label">Free audit</p>
+            <p class="section-label" id="tool-label">Free audit</p>
             <h2>Drop your reports here</h2>
             <p>Your files never leave your browser. Nothing is uploaded to a server.</p>
         </div>
@@ -1740,6 +1740,19 @@
         let currentUser = null;
         let currentCredits = 0;
 
+        // Single source of truth for how the credit count is worded, used everywhere
+        // it's displayed so the nav pill and the tool-header counter never drift apart.
+        function creditLabel(credits) {
+            return credits === -1 ? '∞ audits' : credits + (credits === 1 ? ' audit' : ' audits');
+        }
+        function updateCreditDisplays() {
+            document.getElementById('nav-credits').textContent = creditLabel(currentCredits);
+            const toolLabel = document.getElementById('tool-label');
+            if (toolLabel && currentUser) {
+                toolLabel.textContent = currentCredits === -1 ? 'Unlimited audits' : creditLabel(currentCredits) + ' remaining';
+            }
+        }
+
         async function initAuth() {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) await onSignedIn(session.user);
@@ -1763,7 +1776,7 @@
             const heroCta = document.getElementById('hero-cta');
             if (heroCta) heroCta.textContent = 'Run an audit';
             document.getElementById('nav-email').textContent = user.email;
-            document.getElementById('nav-credits').textContent = currentCredits === -1 ? '∞ audits' : currentCredits + (currentCredits === 1 ? ' audit' : ' audits');
+            updateCreditDisplays();
             document.getElementById('nav-signed-out').style.display = 'none';
             document.getElementById('nav-signed-in').style.display = 'flex';
             document.getElementById('auth-gate').style.display = 'none';
@@ -1841,6 +1854,10 @@
             document.getElementById('no-credits-gate').style.display = 'none';
             document.getElementById('report').style.display = 'none';
             document.getElementById('past-audits').style.display = 'none';
+            const heroCta = document.getElementById('hero-cta');
+            if (heroCta) heroCta.textContent = 'Run my free audit';
+            const toolLabel = document.getElementById('tool-label');
+            if (toolLabel) toolLabel.textContent = 'Free audit';
         }
 
         async function signIn() {
@@ -1879,7 +1896,7 @@
             const result = await res.json();
             if (result.allowed && result.remaining != null) {
                 currentCredits = result.remaining;
-                document.getElementById('nav-credits').textContent = currentCredits === -1 ? '∞ audits' : currentCredits + (currentCredits === 1 ? ' audit' : ' audits');
+                updateCreditDisplays();
             }
             return result;
         }
