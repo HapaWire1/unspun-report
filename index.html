@@ -1165,7 +1165,7 @@
             </div>
         </div>
         <div id="nav-signed-in" class="user-bar" style="display:none">
-            <span class="credit-pill" id="nav-credits">— audits</span>
+            <a href="#tool" class="credit-pill" id="nav-credits" title="Run an audit">— audits</a>
             <span class="user-email" id="nav-email"></span>
             <button class="sign-out-btn" onclick="signOut()">Sign out</button>
         </div>
@@ -1178,7 +1178,7 @@
             <h1>Every month you pay for ads. <em>Find out what you bought.</em></h1>
             <p class="hero-sub">Upload your agency's invoice and your Google or Meta ads report. Sixty seconds later, Unspun hands you the one number that matters — what a new customer actually costs you. In plain English.</p>
             <div class="hero-actions">
-                <a href="#tool" class="btn-primary">Run my free audit</a>
+                <a href="#tool" class="btn-primary" id="hero-cta">Run my free audit</a>
                 <a href="#demo" class="btn-ghost">▶&nbsp; Watch a real audit</a>
             </div>
             <p class="hero-trust"><span>First audit free</span><span>No card required</span><span>Files never leave your browser</span></p>
@@ -1758,6 +1758,10 @@
                 .eq('id', user.id)
                 .single();
             currentCredits = profile?.audit_credits ?? 0;
+            // "Run my free audit" is first-visit copy — once signed in, credits may be
+            // paid, so stop claiming they're free.
+            const heroCta = document.getElementById('hero-cta');
+            if (heroCta) heroCta.textContent = 'Run an audit';
             document.getElementById('nav-email').textContent = user.email;
             document.getElementById('nav-credits').textContent = currentCredits === -1 ? '∞ audits' : currentCredits + (currentCredits === 1 ? ' audit' : ' audits');
             document.getElementById('nav-signed-out').style.display = 'none';
