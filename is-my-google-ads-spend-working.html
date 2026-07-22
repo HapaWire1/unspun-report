@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Not sure if your Google Ads spend is paying off? Here's the one number that tells you — and how to calculate it from reports you already have.">
-    <link rel="canonical" href="https://unspun.report/blog/is-my-google-ads-spend-working.html">
+    <link rel="canonical" href="https://unspun.report/is-my-google-ads-spend-working.html">
     <meta property="og:type" content="article">
-    <meta property="og:url" content="https://unspun.report/blog/is-my-google-ads-spend-working.html">
+    <meta property="og:url" content="https://unspun.report/is-my-google-ads-spend-working.html">
     <meta property="og:site_name" content="Unspun">
     <meta property="og:title" content="Is My Google Ads Spend Working? Here's How to Find Out">
     <meta property="og:description" content="Not sure if your Google Ads spend is paying off? Here's the one number that tells you — and how to calculate it from reports you already have.">
@@ -161,6 +161,66 @@
             font-size: 13px;
             color: var(--ink-soft);
         }
+        .compare-graphic {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 28px 0;
+            padding: 28px 20px;
+            background: #12100C;
+            border-radius: 12px;
+        }
+        .compare-col { flex: 1; text-align: center; }
+        .compare-label {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9A937F;
+            margin-bottom: 10px;
+        }
+        .compare-figure {
+            font-family: var(--font-mono);
+            font-size: 32px;
+            font-weight: 600;
+            color: #EDE9DE;
+            margin-bottom: 6px;
+        }
+        .compare-figure--loss { color: #FF7B6B; }
+        .compare-sub { font-size: 12.5px; color: #9A937F; }
+        .compare-arrow { font-size: 22px; color: #9A937F; flex-shrink: 0; }
+        @media (max-width: 560px) {
+            .compare-graphic { flex-direction: column; }
+            .compare-arrow { transform: rotate(90deg); }
+        }
+        .formula-graphic {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin: 28px 0;
+            padding: 26px 20px;
+            background: var(--paper-hi);
+            border: 1px solid var(--paper-line);
+            border-radius: 12px;
+            font-family: var(--font-mono);
+        }
+        .formula-term {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--ink);
+            background: var(--paper);
+            border: 1px solid var(--paper-line);
+            padding: 8px 14px;
+            border-radius: 6px;
+        }
+        .formula-term--result {
+            background: var(--teal-deep);
+            color: var(--paper-hi);
+            border-color: var(--teal-deep);
+        }
+        .formula-op { font-size: 18px; color: var(--ink-soft); font-weight: 600; }
         .faq-item { margin-bottom: 26px; }
 
         .cta-block {
@@ -220,7 +280,7 @@
 
             <p>That gap — between a report that looks fine and actually knowing whether your <strong>Google Ads spend</strong> is working — is one of the most common frustrations small business owners run into. Not because the numbers are hidden. Because the report almost never shows the number that matters: what a new customer actually cost you, all in.</p>
 
-            <p>This guide walks through how to check <strong>Google Ads ROI</strong> for a small business using the reports you already have, why "cost per conversion" alone can be misleading, and what a <strong>true cost per customer</strong> actually looks like once every dollar is counted.</p>
+            <p>This guide walks through how to check <strong>Google Ads ROI</strong> for a small business using the reports you already have, why <a href="https://support.google.com/google-ads/answer/6270625?hl=en" target="_blank" rel="noopener">"cost per conversion" alone</a> can be misleading, and what a <strong>true cost per customer</strong> actually looks like once every dollar is counted.</p>
 
             <p>By the end, you'll be able to answer the question for yourself — no marketing background required.</p>
 
@@ -236,7 +296,19 @@
                 <li><strong>Blended cost across everything you're paying for.</strong> Ad spend plus management fee, divided by conversions, gives a very different — and more honest — number than ad spend alone.</li>
             </ol>
 
-            <div class="img-note">[IMAGE: side-by-side comparison of a standard agency report vs. a blended cost breakdown]</div>
+            <div class="compare-graphic" role="img" aria-label="Comparison: agency report shows $106.16 cost per conversion, blended true cost including the management fee is $176.56">
+                <div class="compare-col">
+                    <p class="compare-label">What the agency report shows</p>
+                    <p class="compare-figure">$106.16</p>
+                    <p class="compare-sub">cost per conversion (ad spend only)</p>
+                </div>
+                <div class="compare-arrow">→</div>
+                <div class="compare-col compare-col--loss">
+                    <p class="compare-label">True cost, blended</p>
+                    <p class="compare-figure compare-figure--loss">$176.56</p>
+                    <p class="compare-sub">ad spend + agency fee, per customer</p>
+                </div>
+            </div>
 
             <div class="callout">
                 A real example: a Seattle clinic paid $2,123.25 in Google Ads spend and a $1,408 agency management fee in one month — $3,531.25 total — for 20 new patients. Ad spend alone put cost-per-conversion at $106.16, which looked reasonable. Once the management fee was added back in, the true cost per patient was $176.56. Against a $149 patient value, they were <strong>losing money on every single conversion</strong>, and nothing in the agency's report said so.
@@ -244,7 +316,7 @@
 
             <h2>How to Calculate Your Own True Cost Per Customer</h2>
 
-            <p>You don't need special software for this — just your agency invoice and your Google Ads (or Meta Ads) report for the same month.</p>
+            <p>You don't need special software for this — just your agency invoice and your Google Ads (or Meta Ads) report for the same month. If you'd rather skip the manual math, <a href="/#how-it-works">this same calculation runs automatically</a> when you upload both files.</p>
 
             <p><strong>Step 1: Add up everything you paid.</strong><br>Ad spend + agency management fee + any other recurring cost tied to running the ads = your total spend for the month.</p>
 
@@ -254,7 +326,13 @@
 
             <p><strong>Step 4: Compare it to what a customer is actually worth.</strong><br>If you don't know this off the top of your head, estimate conservatively: average sale value, or average customer value if people tend to come back.</p>
 
-            <div class="img-note">[IMAGE: simple 4-step formula graphic — total spend ÷ conversions = true cost per customer]</div>
+            <div class="formula-graphic" role="img" aria-label="Formula: total spend divided by conversions equals true cost per customer">
+                <span class="formula-term">Total spend</span>
+                <span class="formula-op">÷</span>
+                <span class="formula-term">Conversions</span>
+                <span class="formula-op">=</span>
+                <span class="formula-term formula-term--result">True cost per customer</span>
+            </div>
 
             <p>If your true cost per customer is close to or higher than what a customer is worth, the ads aren't working yet, regardless of what impressions or CTR look like. If it's comfortably lower, you likely have room to spend more, not less.</p>
 
@@ -274,7 +352,7 @@
 
             <div class="faq-item">
                 <h3>What's a good cost per conversion for Google Ads?</h3>
-                <p>There's no universal number — it depends entirely on what a customer is worth to your business. A $150 cost per conversion can be a great deal for a business with a $2,000 customer lifetime value, and a loss for one where a customer is worth $100.</p>
+                <p>There's no universal number — it depends entirely on what a customer is worth to your business. <a href="https://focus-digital.co/google-ads-average-cost-per-conversion/" target="_blank" rel="noopener">Industry benchmark data</a> shows median costs ranging from under $21 in some sectors to $60–$140 in others, so a $150 cost per conversion can be a great deal for a business with a $2,000 customer lifetime value, and a loss for one where a customer is worth $100.</p>
             </div>
 
             <div class="faq-item">
@@ -301,7 +379,7 @@
 
             <p>"Is my Google Ads spend working?" isn't answered by impressions, clicks, or even cost-per-conversion on its own. It's answered by one number: what a new customer actually costs you, once every dollar — ad spend and management fee alike — is counted, compared against what that customer is worth.</p>
 
-            <p>Most monthly reports aren't built to show you that number. You can calculate it yourself in a few minutes with the invoice and ads report you already have — or run it through an audit tool that does the math for you in about 60 seconds, no spreadsheet required.</p>
+            <p>Most monthly reports aren't built to show you that number. You can calculate it yourself in a few minutes with the invoice and ads report you already have — or run it through an audit tool that does the math for you in about 60 seconds, no spreadsheet required. Your first audit is free; after that, <a href="/#pricing">audits are available in packs</a> with no subscription.</p>
 
             <p>What does your own true cost per customer look like once you add it up?</p>
         </article>
@@ -310,6 +388,7 @@
             <p>See your own true cost per customer in about 60 seconds. First audit's free.</p>
             <a href="/#tool" class="nav-cta">Run my free audit</a>
         </div>
+
     </main>
 
     <footer>
