@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Is My Google Ads Spend Working? Here's How to Find Out — Unspun</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Not sure if your Google Ads spend is paying off? Here's the one number that tells you — and how to calculate it from reports you already have.">
+    <link rel="canonical" href="https://unspun.report/blog/is-my-google-ads-spend-working.html">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://unspun.report/blog/is-my-google-ads-spend-working.html">
+    <meta property="og:site_name" content="Unspun">
+    <meta property="og:title" content="Is My Google Ads Spend Working? Here's How to Find Out">
+    <meta property="og:description" content="Not sure if your Google Ads spend is paying off? Here's the one number that tells you — and how to calculate it from reports you already have.">
+    <meta property="og:image" content="https://unspun.report/og-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Is My Google Ads Spend Working? Here's How to Find Out">
+    <meta name="twitter:description" content="Not sure if your Google Ads spend is paying off? Here's the one number that tells you — and how to calculate it from reports you already have.">
+    <meta name="twitter:image" content="https://unspun.report/og-image.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --paper:      #F7F4EC;
+            --paper-hi:   #FDFCF8;
+            --paper-line: #E4DFD2;
+            --ink:        #16130D;
+            --ink-soft:   #5C564A;
+            --teal-deep:  #0A7C66;
+            --red-ink:    #C93A3A;
+            --amber:      #B87A1E;
+
+            --font-display: 'Fraunces', Georgia, serif;
+            --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            --font-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--paper);
+            color: var(--ink);
+            line-height: 1.65;
+        }
+
+        ::selection { background: var(--teal-deep); color: var(--paper-hi); }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 40px;
+            position: sticky;
+            top: 0;
+            background: rgba(247, 244, 236, 0.92);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--paper-line);
+            z-index: 100;
+        }
+        .logo {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 24px;
+            color: var(--ink);
+            letter-spacing: -0.5px;
+            text-decoration: none;
+        }
+        .logo::after { content: '.'; color: var(--teal-deep); }
+        .nav-cta {
+            background: var(--ink);
+            color: var(--paper-hi);
+            border: none;
+            padding: 10px 22px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 999px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .nav-cta:hover { background: var(--teal-deep); }
+
+        main {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 64px 24px 40px;
+        }
+
+        .eyebrow {
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--teal-deep);
+            margin-bottom: 14px;
+        }
+        h1 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: clamp(30px, 4.5vw, 42px);
+            line-height: 1.15;
+            letter-spacing: -0.5px;
+            margin-bottom: 18px;
+        }
+        .meta {
+            font-size: 14px;
+            color: var(--ink-soft);
+            margin-bottom: 44px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--paper-line);
+        }
+        article p {
+            font-size: 17px;
+            color: var(--ink);
+            margin-bottom: 20px;
+        }
+        article h2 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 26px;
+            letter-spacing: -0.3px;
+            margin: 48px 0 18px;
+        }
+        article h3 {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 19px;
+            margin: 30px 0 10px;
+        }
+        article ol, article ul {
+            margin: 0 0 20px 22px;
+        }
+        article li {
+            font-size: 17px;
+            color: var(--ink);
+            margin-bottom: 10px;
+        }
+        article strong { font-weight: 600; }
+        .callout {
+            background: var(--paper-hi);
+            border: 1px solid var(--paper-line);
+            border-left: 3px solid var(--teal-deep);
+            border-radius: 6px;
+            padding: 20px 24px;
+            margin: 28px 0;
+            font-size: 16px;
+            color: var(--ink-soft);
+        }
+        .callout strong { color: var(--ink); }
+        .img-note {
+            background: var(--paper-hi);
+            border: 1px dashed var(--paper-line);
+            border-radius: 6px;
+            padding: 16px 20px;
+            margin: 24px 0;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--ink-soft);
+        }
+        .faq-item { margin-bottom: 26px; }
+
+        .cta-block {
+            margin-top: 56px;
+            padding: 36px;
+            background: var(--ink);
+            border-radius: 14px;
+            text-align: center;
+        }
+        .cta-block p {
+            color: var(--paper-hi) !important;
+            font-size: 18px !important;
+            margin-bottom: 20px !important;
+        }
+        .cta-block a.nav-cta {
+            display: inline-block;
+            background: var(--teal-deep);
+        }
+        .cta-block a.nav-cta:hover { background: var(--teal-deep); opacity: 0.9; }
+
+        footer {
+            text-align: center;
+            padding: 48px 24px 32px;
+            border-top: 1px solid var(--paper-line);
+            margin-top: 40px;
+        }
+        footer .f-logo {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 20px;
+        }
+        footer .f-logo span { color: var(--teal-deep); }
+        footer .f-tag { font-family: var(--font-display); font-style: italic; font-size: 14px; color: var(--ink-soft); margin-top: 4px; }
+        footer a { color: var(--teal-deep); text-decoration: none; }
+        footer .f-fine { margin-top: 18px; font-size: 12px; color: var(--ink-soft); }
+
+        @media (max-width: 600px) {
+            nav { padding: 14px 20px; }
+            main { padding: 40px 20px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a class="logo" href="/">unspun</a>
+        <a href="/#tool" class="nav-cta">Run my free audit</a>
+    </nav>
+
+    <main>
+        <p class="eyebrow">Ad Spend &amp; ROI</p>
+        <h1>Is My Google Ads Spend Working? Here's How to Actually Find Out</h1>
+        <p class="meta">A guide for business owners who pay for ads and want a straight answer.</p>
+
+        <article>
+            <p>You open your monthly ads report. Impressions are up. Clicks are up. Your agency says it's "trending well." And you still have no idea if any of it is making you money.</p>
+
+            <p>That gap — between a report that looks fine and actually knowing whether your <strong>Google Ads spend</strong> is working — is one of the most common frustrations small business owners run into. Not because the numbers are hidden. Because the report almost never shows the number that matters: what a new customer actually cost you, all in.</p>
+
+            <p>This guide walks through how to check <strong>Google Ads ROI</strong> for a small business using the reports you already have, why "cost per conversion" alone can be misleading, and what a <strong>true cost per customer</strong> actually looks like once every dollar is counted.</p>
+
+            <p>By the end, you'll be able to answer the question for yourself — no marketing background required.</p>
+
+            <h2>Why "Cost Per Conversion" Alone Doesn't Answer the Question</h2>
+
+            <p>Most Google Ads reports lead with cost per conversion — the ad spend divided by the number of conversions. It's a real number, and it's not wrong. It's just incomplete.</p>
+
+            <p>Here's what it usually leaves out:</p>
+
+            <ol>
+                <li><strong>Your agency's management fee.</strong> If you pay a flat monthly fee on top of ad spend, that money is part of what each customer cost you — even though it rarely shows up next to the ad numbers.</li>
+                <li><strong>What a customer is actually worth to you.</strong> A $100 cost-per-conversion is either a great deal or a loss, depending entirely on your margin. The report can't tell you that because it doesn't know your business.</li>
+                <li><strong>Blended cost across everything you're paying for.</strong> Ad spend plus management fee, divided by conversions, gives a very different — and more honest — number than ad spend alone.</li>
+            </ol>
+
+            <div class="img-note">[IMAGE: side-by-side comparison of a standard agency report vs. a blended cost breakdown]</div>
+
+            <div class="callout">
+                A real example: a Seattle clinic paid $2,123.25 in Google Ads spend and a $1,408 agency management fee in one month — $3,531.25 total — for 20 new patients. Ad spend alone put cost-per-conversion at $106.16, which looked reasonable. Once the management fee was added back in, the true cost per patient was $176.56. Against a $149 patient value, they were <strong>losing money on every single conversion</strong>, and nothing in the agency's report said so.
+            </div>
+
+            <h2>How to Calculate Your Own True Cost Per Customer</h2>
+
+            <p>You don't need special software for this — just your agency invoice and your Google Ads (or Meta Ads) report for the same month.</p>
+
+            <p><strong>Step 1: Add up everything you paid.</strong><br>Ad spend + agency management fee + any other recurring cost tied to running the ads = your total spend for the month.</p>
+
+            <p><strong>Step 2: Find your total conversions.</strong><br>Pull this straight from your ads report — calls, form fills, bookings, purchases, whatever counts as a new customer for your business.</p>
+
+            <p><strong>Step 3: Divide total spend by total conversions.</strong><br>This is your blended, true cost per customer — not just the ad platform's number.</p>
+
+            <p><strong>Step 4: Compare it to what a customer is actually worth.</strong><br>If you don't know this off the top of your head, estimate conservatively: average sale value, or average customer value if people tend to come back.</p>
+
+            <div class="img-note">[IMAGE: simple 4-step formula graphic — total spend ÷ conversions = true cost per customer]</div>
+
+            <p>If your true cost per customer is close to or higher than what a customer is worth, the ads aren't working yet, regardless of what impressions or CTR look like. If it's comfortably lower, you likely have room to spend more, not less.</p>
+
+            <h2>Red Flags Your Report Might Be Hiding a Problem</h2>
+
+            <p>A few patterns are worth checking for specifically:</p>
+
+            <ul>
+                <li><strong>The management fee is billed separately from the ads report</strong>, so it never appears next to the performance numbers — meaning your real cost per customer is always higher than what the report implies.</li>
+                <li><strong>The report emphasizes impressions and CTR</strong> but doesn't connect those numbers to what a conversion actually costs you once everything is added up.</li>
+                <li><strong>"Trending well" language without a bottom-line verdict.</strong> A report can be technically accurate and still avoid ever answering "did this make or lose money."</li>
+            </ul>
+
+            <p>None of this means an agency is acting in bad faith — blended cost math often just isn't part of a standard monthly report. But it's the calculation that answers your actual question, so it's worth doing yourself even if your agency doesn't.</p>
+
+            <h2>Frequently Asked Questions</h2>
+
+            <div class="faq-item">
+                <h3>What's a good cost per conversion for Google Ads?</h3>
+                <p>There's no universal number — it depends entirely on what a customer is worth to your business. A $150 cost per conversion can be a great deal for a business with a $2,000 customer lifetime value, and a loss for one where a customer is worth $100.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>How do I know if my agency is charging too much?</h3>
+                <p>Compare the total you pay (ad spend plus management fee) against your true cost per customer, not just against the ad platform's raw numbers. If the blended cost consistently exceeds what a customer is worth, that's the conversation to have with your agency — regardless of what their fee happens to be.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Should I look at impressions or conversions first?</h3>
+                <p>Conversions. Impressions and clicks show whether people are seeing and engaging with your ad, but they don't tell you whether the ad is making you money. Start with true cost per customer, then use impressions and CTR to diagnose problems if that number looks bad.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Can I calculate this without a marketing background?</h3>
+                <p>Yes — the calculation is arithmetic, not marketing expertise: total spend (ads plus fees) divided by total conversions, compared to what a customer is worth. The hard part is usually finding all the numbers in one place, not the math itself.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>What if my agency won't break out the management fee separately?</h3>
+                <p>You can still estimate it — most invoices list it as a line item even if the ads report doesn't. If it's genuinely bundled with ad spend and unclear, that's itself worth asking your agency to clarify.</p>
+            </div>
+
+            <h2>The Bottom Line</h2>
+
+            <p>"Is my Google Ads spend working?" isn't answered by impressions, clicks, or even cost-per-conversion on its own. It's answered by one number: what a new customer actually costs you, once every dollar — ad spend and management fee alike — is counted, compared against what that customer is worth.</p>
+
+            <p>Most monthly reports aren't built to show you that number. You can calculate it yourself in a few minutes with the invoice and ads report you already have — or run it through an audit tool that does the math for you in about 60 seconds, no spreadsheet required.</p>
+
+            <p>What does your own true cost per customer look like once you add it up?</p>
+        </article>
+
+        <div class="cta-block">
+            <p>See your own true cost per customer in about 60 seconds. First audit's free.</p>
+            <a href="/#tool" class="nav-cta">Run my free audit</a>
+        </div>
+    </main>
+
+    <footer>
+        <p class="f-logo">unspun<span>.</span></p>
+        <p class="f-tag">Your money. Their jargon. Our translation.</p>
+        <p style="margin-top:18px;"><a href="mailto:support@unspun.report">support@unspun.report</a></p>
+        <p class="f-fine">© 2026 Unspun. Your files are processed in your browser and never stored. &nbsp;·&nbsp; <a href="/privacy.html">Privacy Policy</a> &nbsp;·&nbsp; Powered by <a href="https://hapawire.com" target="_blank">Hapawire</a></p>
+    </footer>
+
+</body>
+</html>
