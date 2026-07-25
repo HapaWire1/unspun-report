@@ -1,3 +1,6 @@
 {
-  "outputDirectory": "."
+  "outputDirectory": ".",
+  "crons": [
+    { "path": "/api/daily-report", "schedule": "0 1 * * *" }
+  ]
 }
