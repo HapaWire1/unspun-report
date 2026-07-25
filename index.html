@@ -1182,7 +1182,7 @@
                 <a href="#tool" class="btn-primary" id="hero-cta">Run my free audit</a>
                 <a href="#demo" class="btn-ghost">▶&nbsp; Watch a real audit</a>
             </div>
-            <p class="hero-trust"><span>First audit free</span><span>No card required</span><span>Files never leave your browser</span></p>
+            <p class="hero-trust"><span>First audit free</span><span>No sign-in required</span><span>Files never leave your browser</span></p>
         </div>
         <div class="receipt-wrap">
             <div class="receipt" aria-label="Sample audit receipt based on a real business">
@@ -1407,20 +1407,16 @@
             <p>Your files never leave your browser. Nothing is uploaded to a server.</p>
         </div>
 
-        <!-- Not signed in -->
-        <div class="auth-gate" id="auth-gate">
-            <p><strong>Sign in to run your audit</strong><br>Enter your email and we'll send you a magic link — no password needed.</p>
-            <div class="auth-input-row">
-                <input type="email" class="auth-input" id="auth-email" placeholder="your@email.com">
-                <button class="primary" style="width:auto; white-space:nowrap;" onclick="signIn()">Send Magic Link</button>
-            </div>
-            <div class="status" id="auth-status" style="margin-top:14px;"></div>
+        <!-- Legacy pre-audit gate — no longer shown before upload. The real
+             sign-in prompt now lives in #anon-save-banner, after the report. -->
+        <div class="auth-gate" id="auth-gate" style="display:none">
             <div class="demo-divider">or</div>
             <button class="btn-ghost demo-btn" onclick="runDemo()">See a sample audit — no sign-in needed</button>
         </div>
 
-        <!-- Signed in, has credits -->
-        <div id="tool-inner" style="display:none">
+        <!-- Anyone can drop files and see their real report — no sign-in required.
+             Credits/auth only gate repeat use, prompted after the first report. -->
+        <div id="tool-inner">
             <div class="upload-area" id="drop-zone">
                 <p><strong>Drag and drop your files</strong><br>Agency invoice + monthly report &nbsp;·&nbsp; PDF or CSV</p>
                 <button class="primary" style="width:auto; padding: 12px 28px;" onclick="document.getElementById('file-input').click()">Choose Files</button>
@@ -1449,7 +1445,16 @@
         <div id="report" style="display:none">
 
             <div class="demo-banner" id="demo-banner" style="display:none">
-                <strong>This is a sample audit</strong> — example numbers from a typical small business running Google Ads through an agency. <a href="#tool" onclick="exitDemo()">Sign in to run yours — your first audit is free, no card required.</a>
+                <strong>This is a sample audit</strong> — example numbers from a typical small business running Google Ads through an agency. <a href="#tool" onclick="exitDemo()">Run yours instead — it's free, no sign-in needed.</a>
+            </div>
+
+            <div class="demo-banner" id="anon-save-banner" style="display:none">
+                <strong>That's your real number.</strong> Enter your email to save this report and get 2 more free audits — no card, no password.
+                <div class="auth-input-row" style="margin-top:12px;">
+                    <input type="email" class="auth-input" id="anon-auth-email" placeholder="your@email.com">
+                    <button class="primary" style="width:auto; white-space:nowrap;" onclick="signInFromReport()">Save my report</button>
+                </div>
+                <div class="status" id="anon-auth-status" style="margin-top:10px;"></div>
             </div>
 
             <div class="report-actions">
@@ -1850,10 +1855,10 @@
             currentCredits = 0;
             document.getElementById('nav-signed-out').style.display = 'block';
             document.getElementById('nav-signed-in').style.display = 'none';
-            document.getElementById('auth-gate').style.display = 'block';
-            document.getElementById('tool-inner').style.display = 'none';
+            // Tool stays open — anonymous visitors can still drop files and get a
+            // real report; only repeat/signed-in-only surfaces get hidden here.
+            document.getElementById('tool-inner').style.display = 'block';
             document.getElementById('no-credits-gate').style.display = 'none';
-            document.getElementById('report').style.display = 'none';
             document.getElementById('past-audits').style.display = 'none';
             const heroCta = document.getElementById('hero-cta');
             if (heroCta) heroCta.textContent = 'Run my free audit';
@@ -1861,10 +1866,12 @@
             if (toolLabel) toolLabel.textContent = 'Free audit';
         }
 
-        async function signIn() {
-            const email = document.getElementById('auth-email').value.trim();
+        // Magic-link flow from the post-report save prompt (the only sign-in
+        // entry point now — the pre-upload gate was removed).
+        async function signInFromReport() {
+            const email = document.getElementById('anon-auth-email').value.trim();
             if (!email) return;
-            const statusEl = document.getElementById('auth-status');
+            const statusEl = document.getElementById('anon-auth-status');
             statusEl.textContent = 'Sending…';
             statusEl.className = 'status';
             const { error } = await supabase.auth.signInWithOtp({
@@ -1875,7 +1882,7 @@
                 statusEl.textContent = 'Error: ' + error.message;
                 statusEl.className = 'status error';
             } else {
-                statusEl.textContent = 'Magic link sent! Check your email.';
+                statusEl.textContent = 'Magic link sent! Check your email — come back and click it to save this report.';
                 statusEl.className = 'status success';
             }
         }
@@ -1942,8 +1949,7 @@
 
         async function handleFiles(files) {
             if (!files.length) return;
-            if (!currentUser) { setStatus('Please sign in first.', 'error'); return; }
-            if (currentCredits === 0) { setStatus('No audits remaining. Purchase more to continue.', 'error'); return; }
+            if (currentUser && currentCredits === 0) { setStatus('No audits remaining. Purchase more to continue.', 'error'); return; }
             setStatus('', '');
             document.getElementById('loading').style.display = 'block';
             document.getElementById('report').style.display = 'none';
@@ -1978,20 +1984,29 @@
             document.getElementById('manual-fee-row').style.display = (hasAdData && !hasAgencyFee) ? 'block' : 'none';
 
             if (hasAdData) {
-                // Credit is checked-and-spent atomically on the server at the moment of reveal —
-                // not before parsing (a failed/empty parse should never cost a credit) and not
-                // client-side only (that was the bypassable version of this gate).
-                setStatus('Verifying your audit balance…', '');
-                const credit = await consumeCreditServerSide();
-                if (!credit.allowed) {
-                    document.getElementById('tool-inner').style.display = 'none';
-                    document.getElementById('no-credits-gate').style.display = 'block';
-                    setStatus('', '');
-                    return;
+                if (!currentUser) {
+                    // Anonymous first look: free, uncounted, no server credit check —
+                    // this is client-side math on their own files, costs us nothing.
+                    // Signup is prompted after the value is already shown, not before.
+                    displayReport();
+                    setStatus('Files processed successfully.', 'success');
+                } else {
+                    // Signed in: credit is checked-and-spent atomically on the server at
+                    // the moment of reveal — not before parsing (a failed/empty parse
+                    // should never cost a credit) and not client-side only (that was the
+                    // bypassable version of this gate).
+                    setStatus('Verifying your audit balance…', '');
+                    const credit = await consumeCreditServerSide();
+                    if (!credit.allowed) {
+                        document.getElementById('tool-inner').style.display = 'none';
+                        document.getElementById('no-credits-gate').style.display = 'block';
+                        setStatus('', '');
+                        return;
+                    }
+                    displayReport();
+                    await logAuditEvent();
+                    setStatus('Files processed successfully.', 'success');
                 }
-                displayReport();
-                await logAuditEvent();
-                setStatus('Files processed successfully.', 'success');
             } else {
                 setStatus('Could not find ad performance data. Make sure you uploaded the monthly marketing report PDF or a Google Ads / Meta Ads CSV export.', 'error');
             }
@@ -2212,7 +2227,7 @@
             Object.keys(data).forEach(k => data[k] = null);
             document.getElementById('demo-banner').style.display = 'none';
             document.getElementById('report').style.display = 'none';
-            document.getElementById('auth-email').focus();
+            document.getElementById('drop-zone').scrollIntoView({ behavior: 'smooth' });
         }
 
         // Module scripts execute after the DOM is parsed, so DOMContentLoaded may have
@@ -2223,6 +2238,7 @@
 
         function displayReport() {
             document.getElementById('demo-banner').style.display = demoActive ? 'block' : 'none';
+            document.getElementById('anon-save-banner').style.display = (!demoActive && !currentUser) ? 'block' : 'none';
             applyPlatformLabels();
             const fee = data.agencyFee, spend = data.adSpend;
             const total = (fee != null && spend != null) ? fee + spend : spend;
@@ -2280,7 +2296,7 @@
         }
 
         // Expose functions needed by inline onclick handlers
-        window.signIn = signIn;
+        window.signInFromReport = signInFromReport;
         window.signOut = signOut;
         window.calculate = calculate;
         window.applyManualFee = applyManualFee;
