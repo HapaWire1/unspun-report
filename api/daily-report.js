@@ -10,13 +10,18 @@
 //   CRON_SECRET                                     — Vercel sets the Authorization header to match this automatically
 
 export default async function handler(req, res) {
-  // Vercel Cron sends `Authorization: Bearer <CRON_SECRET>` on scheduled invocations.
-  // A `?secret=` query param is also accepted so this can be triggered manually to
-  // verify the pipeline without waiting for the next scheduled run.
-  const auth = req.headers.authorization || '';
-  const querySecret = req.query?.secret;
-  const authorized = auth === `Bearer ${process.env.CRON_SECRET}` || querySecret === process.env.CRON_SECRET;
-  if (process.env.CRON_SECRET && !authorized) {
+  // Fail closed: if the secret isn't configured, refuse to run rather than leaving
+  // the endpoint publicly triggerable (it emails business metrics + reads two DBs).
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret) {
+    return res.status(503).json({ error: 'CRON_SECRET not configured' });
+  }
+  // Authenticate via the Authorization header only. Vercel Cron sends
+  // `Authorization: Bearer <CRON_SECRET>` automatically. The previous `?secret=`
+  // query-param path was removed — secrets in URLs leak into server, proxy, and
+  // browser-history logs. To trigger manually, pass the header instead:
+  //   curl -H "Authorization: Bearer $CRON_SECRET" https://unspun.report/api/daily-report
+  if (req.headers.authorization !== `Bearer ${cronSecret}`) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
