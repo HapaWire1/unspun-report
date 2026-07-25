@@ -11,9 +11,12 @@
 
 export default async function handler(req, res) {
   // Vercel Cron sends `Authorization: Bearer <CRON_SECRET>` on scheduled invocations.
-  // Reject anything else so this endpoint can't be triggered by randoms hitting the URL.
+  // A `?secret=` query param is also accepted so this can be triggered manually to
+  // verify the pipeline without waiting for the next scheduled run.
   const auth = req.headers.authorization || '';
-  if (process.env.CRON_SECRET && auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  const querySecret = req.query?.secret;
+  const authorized = auth === `Bearer ${process.env.CRON_SECRET}` || querySecret === process.env.CRON_SECRET;
+  if (process.env.CRON_SECRET && !authorized) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
