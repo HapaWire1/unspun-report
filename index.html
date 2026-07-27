@@ -23,6 +23,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- jsPDF: generates the downloadable audit report entirely client-side, so the
+         "your files never leave your browser" promise still holds for the PDF too. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -868,6 +871,17 @@
             color: var(--text);
         }
         .demo-banner a { color: var(--teal); font-weight: 600; }
+        .reclaim-note {
+            background: rgba(184, 122, 30, 0.10);
+            border: 1px solid var(--amber);
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 22px;
+            font-size: 14px;
+            line-height: 1.55;
+            color: var(--text);
+        }
+        .reclaim-note a { color: var(--teal); font-weight: 600; }
 
         button.primary {
             background: var(--teal);
@@ -965,6 +979,34 @@
         #tool th, #tool td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
         #tool th { background: var(--surface2); color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: 1px; }
         #tool .term { border-right: 3px solid var(--teal); font-weight: 600; width: 35%; color: var(--text); }
+
+        /* Inline "what does this mean?" tooltips on key report numbers. CSS-only:
+           reveals on hover AND keyboard/tap focus (tabindex), so it works on mobile. */
+        .tip {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 16px; height: 16px; margin-left: 5px; border-radius: 50%;
+            background: var(--surface2); border: 1px solid var(--border);
+            color: var(--muted); font-size: 10px; font-weight: 700; font-style: normal;
+            font-family: var(--font-body); cursor: help; position: relative;
+            vertical-align: middle; user-select: none; -webkit-tap-highlight-color: transparent;
+        }
+        .tip:hover, .tip:focus { background: var(--teal); color: #05261E; border-color: var(--teal); outline: none; }
+        .tip::after {
+            content: attr(data-tip);
+            position: absolute; bottom: calc(100% + 9px); left: 50%; transform: translateX(-50%);
+            width: max-content; max-width: min(260px, 78vw);
+            background: #05261E; color: var(--text); border: 1px solid var(--teal);
+            padding: 9px 12px; border-radius: 9px; font-size: 12.5px; font-weight: 400;
+            line-height: 1.45; text-align: left; white-space: normal;
+            opacity: 0; visibility: hidden; transition: opacity .12s ease; z-index: 30;
+            pointer-events: none; box-shadow: 0 10px 28px -10px rgba(0,0,0,0.7);
+        }
+        .tip::before {
+            content: ''; position: absolute; bottom: calc(100% + 3px); left: 50%; transform: translateX(-50%);
+            border: 6px solid transparent; border-top-color: var(--teal);
+            opacity: 0; visibility: hidden; transition: opacity .12s ease; z-index: 31;
+        }
+        .tip:hover::after, .tip:focus::after, .tip:hover::before, .tip:focus::before { opacity: 1; visibility: visible; }
 
         /* ── PRICING (paper) ── */
         #pricing { max-width: 1080px; text-align: center; }
@@ -1070,9 +1112,12 @@
 
         /* ── RESPONSIVE ── */
         @media (max-width: 900px) {
-            .hero { grid-template-columns: 1fr; gap: 64px; padding-top: 48px; }
+            .hero { grid-template-columns: minmax(0, 1fr); gap: 64px; padding-top: 48px; }
             .receipt-wrap { margin-bottom: 30px; }
-            .case-grid { grid-template-columns: 1fr; }
+            /* minmax(0,1fr) lets the single mobile column shrink below its content's
+               min-width; without it the case-study panel blows the track out and the
+               whole page scrolls sideways. Inner mockups keep their own overflow-x. */
+            .case-grid { grid-template-columns: minmax(0, 1fr); }
             nav { padding: 14px 20px; }
             .nav-links a:not(.nav-cta):not(.user-bar a) { display: none; }
             #tool { padding: 44px 20px; border-radius: 16px; }
@@ -1083,6 +1128,30 @@
             .auth-input-row { flex-direction: column; }
             .auth-input { border-radius: 12px; }
             .hero h1 { font-size: 36px; }
+
+            /* ── Audit tool + report on phones ── */
+            #tool { padding: 40px 14px; }
+            .upload-area { padding: 30px 16px; }
+            .upload-btn-row { flex-direction: column; }
+            .upload-btn-row .primary, #tool .sample-btn { width: 100%; }
+            .box { padding: 20px 16px; }
+            .box h2 { font-size: 17px; }
+            .box p { font-size: 14px; }
+            /* Tables: shrink padding and let the term column breathe; wrap the whole
+               table so a long line can scroll inside its box rather than the page. */
+            #report .box { overflow-x: auto; }
+            #tool th, #tool td { padding: 9px 8px; font-size: 13px; }
+            #tool .term { width: 42%; }
+            /* P/L calculator: stack the input + button instead of a cramped inline row. */
+            .box .pl-input { width: 100%; max-width: 260px; }
+            #report .report-actions { flex-wrap: wrap; gap: 8px; }
+            #report .report-actions button { flex: 1 1 140px; }
+            #next-steps .next-actions { grid-template-columns: 1fr; }
+            /* Keep tooltips from spilling off-screen near the edges. */
+            .tip::after { max-width: 74vw; }
+            /* Trust line: stack the points instead of one nowrap row that overflows. */
+            .hero-trust { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+            .hero-trust span + span::before { content: none; }
         }
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
@@ -1125,13 +1194,76 @@
             cursor: pointer;
         }
         .report-actions button:hover { border-color: var(--teal); color: var(--teal); }
+        .report-actions button.pdf-btn {
+            background: var(--teal); color: #05261E; border: none; font-weight: 700;
+        }
+        .report-actions button.pdf-btn:hover { background: var(--teal-dim); color: #05261E; }
+
+        /* Upload helpers — sample button, "what files do I need" panel */
+        .upload-btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; align-items: center; }
+        #tool .sample-btn { padding: 11px 22px; font-size: 14px; }
+        .file-help {
+            margin-top: 16px; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; padding: 4px 18px;
+        }
+        .file-help summary {
+            cursor: pointer; padding: 14px 0; font-weight: 600; color: var(--text);
+            font-size: 15px; list-style: none;
+        }
+        .file-help summary::-webkit-details-marker { display: none; }
+        .file-help summary::before { content: '＋'; color: var(--teal); margin-right: 10px; font-weight: 700; }
+        .file-help[open] summary::before { content: '－'; }
+        .file-help-body { padding: 0 0 16px 0; font-size: 14px; color: var(--text); line-height: 1.6; }
+        .file-help-body ol { margin: 12px 0 12px 20px; }
+        .file-help-body li { margin-bottom: 12px; }
+        .file-help-body .muted-note { color: var(--muted); font-size: 13px; }
+        .file-help-body .sample-links { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+        .file-help-body a { color: var(--teal); font-weight: 600; }
+
+        /* Extraction summary + confidence badge */
+        #parse-summary {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; padding: 16px 20px; margin-bottom: 8px; font-size: 14px;
+        }
+        #parse-summary .ps-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+        #parse-summary .ps-title { font-weight: 700; color: var(--text); }
+        .conf-badge { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; letter-spacing: .02em; }
+        .conf-badge.high { background: rgba(74,222,128,0.12); color: var(--green); border: 1px solid rgba(74,222,128,0.4); }
+        .conf-badge.medium { background: rgba(184,122,30,0.14); color: var(--amber); border: 1px solid rgba(184,122,30,0.45); }
+        #parse-summary .ps-fields { color: var(--muted); font-family: var(--font-mono); font-size: 13px; line-height: 1.7; }
+        #parse-summary .ps-note { color: var(--amber); margin-top: 8px; font-size: 13px; }
+
+        /* Post-audit next steps */
+        .next-steps .next-lead { color: var(--muted); margin-bottom: 18px; }
+        .next-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+        .next-card {
+            display: block; text-decoration: none; background: var(--surface2);
+            border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px;
+            transition: border-color .15s, transform .15s;
+        }
+        .next-card:hover { border-color: var(--teal); transform: translateY(-2px); }
+        .next-card strong { display: block; color: var(--teal); font-size: 15px; margin-bottom: 6px; }
+        .next-card span { display: block; color: var(--muted); font-size: 13.5px; line-height: 1.55; }
+
+        /* Profit/Loss input clarity + transparent math */
+        .pl-prompt { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+        .pl-help { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.55; max-width: 640px; }
+        .pl-input-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .pl-input-row .pl-currency { font-family: var(--font-mono); font-size: 18px; color: var(--muted); }
+        .pl-math {
+            margin-top: 14px; padding: 14px 16px; background: var(--surface2);
+            border: 1px solid var(--border); border-radius: 10px;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .pl-math .plm-line { font-family: var(--font-mono); font-size: 13px; color: var(--muted); line-height: 1.6; }
+        .pl-math .plm-line strong { font-family: var(--font-body); color: var(--text); }
 
         /* ── PRINT: only the audit report, on paper colors ── */
         @media print {
             body * { visibility: hidden; }
             #report, #report * { visibility: visible; }
             #report { position: absolute; top: 0; left: 0; width: 100%; }
-            .demo-banner, .report-actions, #loss-cta, #report .primary { display: none !important; }
+            .demo-banner, .report-actions, #loss-cta, #report .primary, #next-steps, #parse-summary { display: none !important; }
             #report .box {
                 background: #fff !important;
                 border: 1px solid #ccc !important;
@@ -1407,19 +1539,19 @@
             <p>Your files never leave your browser. Nothing is uploaded to a server.</p>
         </div>
 
-        <!-- Legacy pre-audit gate — no longer shown before upload. The real
-             sign-in prompt now lives in #anon-save-banner, after the report. -->
-        <div class="auth-gate" id="auth-gate" style="display:none">
-            <div class="demo-divider">or</div>
-            <button class="btn-ghost demo-btn" onclick="runDemo()">See a sample audit — no sign-in needed</button>
-        </div>
+        <!-- Shown only if a post-purchase credit reclaim fails, so the buyer isn't left in
+             silence. Their payment is never discarded — this points them to support. -->
+        <div class="reclaim-note" id="reclaim-note" style="display:none"></div>
 
-        <!-- Anyone can drop files and see their real report — no sign-in required.
-             Credits/auth only gate repeat use, prompted after the first report. -->
+        <!-- Anyone can drop files and see their real report — no sign-in, ever.
+             Parsing is 100% client-side; nothing is uploaded to a server. -->
         <div id="tool-inner">
             <div class="upload-area" id="drop-zone">
                 <p><strong>Drag and drop your files</strong><br>Agency invoice + monthly report &nbsp;·&nbsp; PDF or CSV</p>
-                <button class="primary" style="width:auto; padding: 12px 28px;" onclick="document.getElementById('file-input').click()">Choose Files</button>
+                <div class="upload-btn-row">
+                    <button class="primary" style="width:auto; padding: 12px 28px;" onclick="document.getElementById('file-input').click()">Choose Files</button>
+                    <button class="btn-ghost sample-btn" type="button" onclick="runSampleData()">Try with sample data</button>
+                </div>
                 <input type="file" id="file-input" multiple accept=".pdf,.csv">
                 <div class="file-list" id="file-list"></div>
                 <div class="manual-input" id="manual-fee-row" style="display:none">
@@ -1429,6 +1561,26 @@
                 <div id="loading"><span class="spinner"></span>Reading files…</div>
                 <div class="status" id="upload-status"></div>
             </div>
+
+            <!-- Lowers upload anxiety: says exactly what to export and where, and lets
+                 hesitant owners grab realistic sample files to test the tool safely. -->
+            <details class="file-help">
+                <summary>What files do I need?</summary>
+                <div class="file-help-body">
+                    <p><strong>Two files give the fullest picture — but either one works on its own:</strong></p>
+                    <ol>
+                        <li><strong>Your monthly ad report</strong> — Google Ads or Meta / Facebook.
+                            <br><span class="muted-note"><strong>Google Ads:</strong> Campaigns → set the date range to last month → <em>Download → .csv</em>. &nbsp;<strong>Meta:</strong> Ads Manager → Campaigns → pick the month → <em>Reports → Export → .csv</em>. CSV is the most reliable; PDF also works.</span></li>
+                        <li><strong>Your agency's invoice</strong> for that month (PDF).
+                            <br><span class="muted-note">No invoice handy? Skip it — you can type the agency fee in manually after uploading the report.</span></li>
+                    </ol>
+                    <p class="sample-links"><strong>Want to test it first?</strong> Grab a realistic example —
+                        <a href="/samples/unspun-sample-google-ads-report.csv" download>sample Google Ads report (CSV)</a>
+                        &nbsp;·&nbsp;
+                        <a href="/samples/unspun-sample-agency-invoice.pdf" download>sample agency invoice (PDF)</a>
+                        — and drop them above, or just tap <strong>“Try with sample data.”</strong></p>
+                </div>
+            </details>
         </div>
 
         <!-- Signed in, no credits -->
@@ -1449,45 +1601,61 @@
             </div>
 
             <div class="demo-banner" id="anon-save-banner" style="display:none">
-                <strong>That's your real number.</strong> Enter your email to save this report and get 2 more free audits — no card, no password.
-                <div class="auth-input-row" style="margin-top:12px;">
+                <strong>That's your real number.</strong> Run as many audits as you like — free, no sign-in needed. Want to keep this one and compare month over month?
+                <div class="save-actions" style="margin-top:12px;">
+                    <button class="btn-ghost" type="button" onclick="revealSave()">Save &amp; email me this report</button>
+                </div>
+                <!-- The email field only appears if the user explicitly chooses to save/share —
+                     no magic-link prompt is forced during or right after a free audit. -->
+                <div class="auth-input-row" id="anon-auth-row" style="margin-top:12px; display:none;">
                     <input type="email" class="auth-input" id="anon-auth-email" placeholder="your@email.com">
-                    <button class="primary" style="width:auto; white-space:nowrap;" onclick="signInFromReport()">Save my report</button>
+                    <button class="primary" style="width:auto; white-space:nowrap;" onclick="signInFromReport()">Send me a link</button>
                 </div>
                 <div class="status" id="anon-auth-status" style="margin-top:10px;"></div>
             </div>
 
+            <!-- Extraction summary + confidence — shows exactly what we read from the
+                 files (or couldn't), so the numbers feel trustworthy, not magic. -->
+            <div id="parse-summary" style="display:none"></div>
+
             <div class="report-actions">
-                <button onclick="window.print()" aria-label="Print or save this audit as a PDF">🖨&nbsp; Print / save as PDF</button>
+                <button class="pdf-btn" onclick="downloadPDF()" aria-label="Download this audit as a PDF report">⬇&nbsp; Download PDF report</button>
+                <button onclick="window.print()" aria-label="Print this audit">🖨&nbsp; Print</button>
             </div>
 
             <div class="box">
                 <h2>Your Marketing Spend Breakdown</h2>
                 <p><strong>Agency Fee</strong>: $<span id="r-agency-fee">—</span></p>
                 <p><strong>Actual <span id="lbl-platform-1">Google</span> Ad Spend</strong>: $<span id="r-ad-spend">—</span></p>
-                <p><strong style="color:var(--red)">Total Cost This Month</strong>: <span class="highlight">$<span id="r-total">—</span></span></p>
+                <p><strong style="color:var(--red)">Total Cost This Month</strong><span class="tip" tabindex="0" role="note" aria-label="Everything you paid this month — your agency's fee plus the actual ad spend." data-tip="Everything you paid this month — your agency's fee plus the actual ad spend.">i</span>: <span class="highlight">$<span id="r-total">—</span></span></p>
             </div>
 
             <div class="box">
                 <h2>What You Got This Month</h2>
                 <p><strong>Impressions</strong>: <span id="r-impressions">—</span> → Your ad was shown that many times on <span id="lbl-platform-2">Google</span></p>
                 <p><strong>Clicks</strong>: <span id="r-clicks">—</span> at <strong>$<span id="r-cpc">—</span></strong> each = <strong>$<span id="r-ad-spend-2">—</span></strong> total ad spend</p>
-                <p><strong>Click-Through Rate (CTR)</strong>: <span id="r-ctr">—</span> → <span id="r-ctr-label">—</span></p>
-                <p><strong>Conversions</strong>: <span id="r-conversions">—</span> at <strong>$<span id="r-cost-per-conv">—</span></strong> ad-only cost each</p>
-                <p><strong>Conversion Rate</strong>: <span id="r-cvr">—</span> → <span id="r-cvr-label">—</span></p>
-                <p><strong>Blended Cost per Conversion</strong>: <strong>$<span id="r-blended">—</span></strong></p>
+                <p><strong>Click-Through Rate (CTR)</strong><span class="tip" tabindex="0" role="note" aria-label="Of everyone who saw your ad, the share who clicked. Higher means a more compelling ad." data-tip="Of everyone who saw your ad, the share who clicked. Higher means a more compelling ad.">i</span>: <span id="r-ctr">—</span> → <span id="r-ctr-label">—</span></p>
+                <p><strong>Conversions</strong>: <span id="r-conversions">—</span> at <strong>$<span id="r-cost-per-conv">—</span></strong> ad-only cost each<span class="tip" tabindex="0" role="note" aria-label="How much ad spend it took to get one conversion — before the agency fee is added in." data-tip="How much ad spend it took to get one conversion — before the agency fee is added in.">i</span></p>
+                <p><strong>Conversion Rate</strong><span class="tip" tabindex="0" role="note" aria-label="Of the people who clicked, the share who took action. Higher means your landing page is working." data-tip="Of the people who clicked, the share who took action. Higher means your landing page is working.">i</span>: <span id="r-cvr">—</span> → <span id="r-cvr-label">—</span></p>
+                <p><strong>Blended Cost per Conversion</strong><span class="tip" tabindex="0" role="note" aria-label="The real all-in cost of one conversion: ad spend plus agency fee, divided by conversions. This is the number that matters." data-tip="The real all-in cost of one conversion: ad spend plus agency fee, divided by conversions. This is the number that matters.">i</span>: <strong>$<span id="r-blended">—</span></strong></p>
             </div>
 
             <div class="box">
-                <h2>Profit / Loss Calculator</h2>
-                <p style="margin-bottom:16px;">Average value per new customer:
-                <input type="number" class="pl-input" id="value" value="300">
-                <button class="primary" onclick="calculate()" style="width:auto; margin-left:10px; padding:10px 20px;">Calculate</button></p>
-                <div id="result" style="font-size:19px; margin-top:8px; font-weight:bold"></div>
+                <h2>Are you actually making money?</h2>
+                <p class="pl-prompt">What is a new customer worth to you?</p>
+                <p class="pl-help">Use your average revenue per new customer — or their first-90-day value if you have repeat business. Not sure? Start with a conservative estimate. Change the number and the verdict updates instantly, so you can test "what if a customer is really worth $180?"</p>
+                <div class="pl-input-row">
+                    <span class="pl-currency">$</span>
+                    <input type="number" class="pl-input" id="value" value="300" min="0" step="10" oninput="calculate()" onchange="trackValue()" aria-label="Value of one new customer, in dollars">
+                    <button class="primary" onclick="calculate()" style="width:auto; padding:10px 20px;">Update</button>
+                </div>
+                <div id="result" style="font-size:19px; margin-top:18px; font-weight:bold"></div>
+                <!-- Transparent math: shows exactly how the true cost per customer is built,
+                     so the profit/loss figure never feels like a black box. -->
+                <div id="pl-math" class="pl-math" style="display:none"></div>
                 <div id="loss-cta" style="display:none; margin-top:14px; padding:14px 16px; background:rgba(255,123,107,0.08); border:1px solid rgba(255,123,107,0.4); border-radius:10px; font-size:14px; line-height:1.6;">
                     <strong style="color:var(--text)">Found a problem? That's what this audit is for.</strong> The team behind Unspun helps owners fix exactly this — <a href="mailto:human@hapawire.com?subject=My%20Unspun%20audit%20found%20a%20problem" style="color:var(--teal); font-weight:600;">email them your audit</a> and get a straight answer.
                 </div>
-                <p style="font-size:13px; color:var(--muted); margin-top:10px;">Based on blended cost (ad spend + agency fee) per conversion.</p>
             </div>
 
             <div class="box">
@@ -1505,6 +1673,23 @@
                     <tr><td class="term">Cost per Conversion</td><td>How much you spent on ads to get one conversion.</td></tr>
                     <tr><td class="term">Blended Cost</td><td>The real total cost after adding the agency fee.</td></tr>
                 </table>
+            </div>
+
+            <!-- Post-audit next steps — gives people somewhere clear to go instead of
+                 bouncing. Pricing nudge is hidden for unlimited accounts. -->
+            <div class="box next-steps" id="next-steps">
+                <h2>What now?</h2>
+                <p class="next-lead">You've got the real number. Here's what people usually do next:</p>
+                <div class="next-actions">
+                    <a class="next-card" href="mailto:human@hapawire.com?subject=My%20Unspun%20audit&amp;body=I%20ran%20an%20audit%20on%20Unspun%20and%20want%20a%20straight%20read%20on%20what%20it%20means.">
+                        <strong>Talk to a human about this →</strong>
+                        <span>Get a plain-English read on your numbers and what to ask your agency. No pitch.</span>
+                    </a>
+                    <a class="next-card" href="#pricing" id="next-pricing">
+                        <strong>Track it month over month →</strong>
+                        <span>Audit packs start at $79 for 3 — no subscription, no expiry. Spot the trend before it costs you.</span>
+                    </a>
+                </div>
             </div>
 
         </div>
@@ -1743,6 +1928,14 @@
             if (banner) banner.style.display = 'block';
         }
 
+        // ── Funnel tracking ────────────────────────────────────────────────────
+        // Thin wrapper over Vercel Web Analytics custom events. Fully guarded: if the
+        // analytics script hasn't loaded (or events aren't enabled), this is a no-op and
+        // never throws. Lets us see exactly where people drop in the audit funnel.
+        function track(name, data) {
+            try { if (typeof window.va === 'function') window.va('event', data ? { name, data } : { name }); } catch (_) {}
+        }
+
         let currentUser = null;
         let currentCredits = 0;
 
@@ -1810,6 +2003,73 @@
             if (referralBanner && (profile?.referred_by || pendingRef)) referralBanner.style.display = 'block';
 
             loadPastAudits();
+            reclaimPendingPurchase();
+        }
+
+        // Closes a payment dead-end: a signed-out visitor who buys a pack lands on
+        // success.html, which can't claim credits without a session, so it stashes the
+        // Stripe session id. Once they sign in (magic link returns them here), finish the
+        // claim. verify-payment is idempotent (dedupes on stripe_session_id), so calling
+        // it again is safe even if the credits were already applied.
+        // Guards against concurrent runs: onSignedIn can fire more than once per load
+        // (getSession + the INITIAL_SESSION event), and without this two reclaim POSTs
+        // could overlap and both credit before either clears the stash.
+        let reclaimInFlight = false;
+        async function reclaimPendingPurchase() {
+            const sessionId = localStorage.getItem('unspun_pending_purchase');
+            if (!sessionId || !currentUser || reclaimInFlight) return;
+            reclaimInFlight = true;
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return;
+
+                let res, result;
+                try {
+                    res = await fetch('/api/verify-payment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ session_id: sessionId, access_token: session.access_token })
+                    });
+                    result = await res.json();
+                } catch (_) {
+                    // Network/transient failure: keep the stash and retry on the next
+                    // sign-in. Don't alarm the buyer over a blip.
+                    return;
+                }
+
+                if (res.ok && (result.credits_added || result.already_processed)) {
+                    // Success — credits are on the account. Clear the stash and refresh UI.
+                    localStorage.removeItem('unspun_pending_purchase');
+                    const note = document.getElementById('reclaim-note');
+                    if (note) note.style.display = 'none';
+                    track('purchase_reclaimed', { credits: result.credits_added || 0 });
+                    const { data: profile } = await supabase
+                        .from('profiles').select('audit_credits').eq('id', currentUser.id).single();
+                    if (profile) {
+                        currentCredits = profile.audit_credits ?? currentCredits;
+                        updateCreditDisplays();
+                        if (currentCredits > 0 || currentCredits === -1) {
+                            document.getElementById('tool-inner').style.display = 'block';
+                            document.getElementById('no-credits-gate').style.display = 'none';
+                        }
+                    }
+                } else {
+                    // Definitive server rejection (e.g. amount not recognized, credit write
+                    // failed). NEVER discard the stash — a real payment must not vanish — but
+                    // stop failing silently: point the buyer to support. Persists across
+                    // sign-ins until it's resolved.
+                    track('purchase_reclaim_failed', {
+                        reason: (result && result.error) ? String(result.error).slice(0, 80) : 'unknown'
+                    });
+                    const note = document.getElementById('reclaim-note');
+                    if (note) {
+                        note.innerHTML = 'We couldn\'t automatically add the audits from your recent purchase — but your payment is safe. Email <a href="mailto:support@unspun.report?subject=Purchase%20not%20applied">support@unspun.report</a> and we\'ll add them right away.';
+                        note.style.display = 'block';
+                    }
+                }
+            } finally {
+                reclaimInFlight = false;
+            }
         }
 
         // Past audits, rendered from the user's own audit_metrics rows (own-row RLS).
@@ -1882,6 +2142,7 @@
                 statusEl.textContent = 'Error: ' + error.message;
                 statusEl.className = 'status error';
             } else {
+                track('magic_link_requested');
                 statusEl.textContent = 'Magic link sent! Check your email — come back and click it to save this report.';
                 statusEl.className = 'status success';
             }
@@ -1949,10 +2210,22 @@
 
         async function handleFiles(files) {
             if (!files.length) return;
+            track('audit_started', {
+                source: 'upload',
+                files: files.length,
+                types: [...new Set(files.map(f => (f.name.split('.').pop() || '').toLowerCase()))].join(',')
+            });
             if (currentUser && currentCredits === 0) { setStatus('No audits remaining. Purchase more to continue.', 'error'); return; }
             setStatus('', '');
+            // Clear any gate left over from a prior attempt so a fresh run starts clean.
+            document.getElementById('no-credits-gate').style.display = 'none';
+            document.getElementById('tool-inner').style.display = 'block';
             document.getElementById('loading').style.display = 'block';
             document.getElementById('report').style.display = 'none';
+            // Each upload is a fresh audit: clear metrics from any prior run so a failed or
+            // partial parse can never surface the previous run's numbers as if they were new.
+            // (Drop the invoice + report together — that's a single call and parses fine.)
+            Object.keys(data).forEach(k => data[k] = null);
             const fileListEl = document.getElementById('file-list');
             fileListEl.innerHTML = '';
 
@@ -1984,11 +2257,18 @@
             document.getElementById('manual-fee-row').style.display = (hasAdData && !hasAgencyFee) ? 'block' : 'none';
 
             if (hasAdData) {
+                const core = ['adSpend', 'clicks', 'conversions', 'impressions'];
+                track('parse_succeeded', {
+                    platform: data.platform || 'unknown',
+                    confidence: core.every(k => data[k] != null) ? 'high' : 'partial'
+                });
                 if (!currentUser) {
-                    // Anonymous first look: free, uncounted, no server credit check —
-                    // this is client-side math on their own files, costs us nothing.
-                    // Signup is prompted after the value is already shown, not before.
+                    // Anonymous audits are free and unlimited — it's client-side math on
+                    // the user's own files, so it costs us nothing and keeps first-run
+                    // bounce low. Sign-up is only ever offered afterward, as an optional
+                    // save/share (see #anon-save-banner), never forced.
                     displayReport();
+                    track('audit_completed', { auth: 'anon' });
                     setStatus('Files processed successfully.', 'success');
                 } else {
                     // Signed in: credit is checked-and-spent atomically on the server at
@@ -2005,10 +2285,12 @@
                     }
                     displayReport();
                     await logAuditEvent();
+                    track('audit_completed', { auth: 'signed_in' });
                     setStatus('Files processed successfully.', 'success');
                 }
             } else {
-                setStatus('Could not find ad performance data. Make sure you uploaded the monthly marketing report PDF or a Google Ads / Meta Ads CSV export.', 'error');
+                track('parse_failed', { reason: 'no_ad_data' });
+                setStatus('Couldn\'t read ad performance data from those files. Make sure it\'s a monthly Google Ads or Meta Ads export (CSV is most reliable). Not sure what to upload? Tap "What files do I need?" or "Try with sample data" above.', 'error');
             }
         }
 
@@ -2230,6 +2512,158 @@
             document.getElementById('drop-zone').scrollIntoView({ behavior: 'smooth' });
         }
 
+        // ── Sample data ──────────────────────────────────────────────────────────
+        // Kept identical to the downloadable /samples/*.csv so "Try with sample data"
+        // and dropping the downloaded file produce the same result. Realistic small-
+        // business Google Ads month, exported in Google's real CSV shape.
+        const SAMPLE_GOOGLE_CSV = `Campaign report
+Jun 1, 2026 - Jun 30, 2026
+Campaign,Impressions,Clicks,CTR,Avg. CPC,Cost,Conversions,Cost / conv.
+Spring Promo - Search,28541,642,2.25%,1.94,1245.48,19,65.55
+Brand Terms,14203,301,2.12%,1.87,562.87,9,62.54
+Local Services,9712,181,1.86%,2.26,409.06,6,68.18
+Total - all campaigns,52456,1124,2.14%,1.97,2217.41,34,65.22`;
+
+        // Runs the sample through the *real* CSV parser (not a data shortcut), then
+        // fills a sample agency fee — so this exercises the same path a real upload does.
+        // Treated as a credit-free sample (demo semantics: no credit, no logging).
+        function runSampleData() {
+            track('sample_data_used');
+            Object.keys(data).forEach(k => data[k] = null);
+            try { parseCSV(SAMPLE_GOOGLE_CSV); } catch (e) { console.error('sample parse failed', e); }
+            data.agencyFee = 1450; // sample invoice total
+            demoActive = true;
+            document.getElementById('manual-fee-row').style.display = 'none';
+            displayReport();
+            document.getElementById('report').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // The save/email prompt is opt-in — the email field only appears once the user
+        // asks for it, so no magic-link ask is forced right after a free audit.
+        function revealSave() {
+            const row = document.getElementById('anon-auth-row');
+            if (!row) return;
+            track('save_prompt_opened');
+            row.style.display = 'flex';
+            const email = document.getElementById('anon-auth-email');
+            if (email) email.focus();
+        }
+
+        // ── Download PDF ─────────────────────────────────────────────────────────
+        // Builds the report client-side with jsPDF (text, not a screenshot) so it stays
+        // crisp and the "files never leave your browser" promise holds. Falls back to
+        // the browser print dialog if the library didn't load.
+        function downloadPDF() {
+            if (!window.jspdf || !window.jspdf.jsPDF) { track('pdf_fallback_print'); window.print(); return; }
+            track('pdf_downloaded', { platform: data.platform || 'unknown', demo: !!demoActive });
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+            const M = 54;
+            const W = doc.internal.pageSize.getWidth();
+            const H = doc.internal.pageSize.getHeight();
+            const teal = [10, 124, 102], ink = [22, 19, 13], soft = [92, 86, 74], red = [201, 58, 58], green = [30, 122, 74];
+            const platform = data.platform === 'meta' ? 'Meta' : 'Google';
+            let y = M;
+
+            const guard = h => { if (y + h > H - M) { doc.addPage(); y = M; } };
+            const line = (txt, o = {}) => {
+                const size = o.size || 11, color = o.color || ink;
+                doc.setFont('helvetica', o.bold ? 'bold' : 'normal').setFontSize(size).setTextColor(color[0], color[1], color[2]);
+                doc.splitTextToSize(txt, W - M * 2).forEach(l => { guard(size + 7); doc.text(l, M, y); y += size + 7; });
+            };
+            const kv = (k, v, o = {}) => {
+                guard(19);
+                doc.setFont('helvetica', 'normal').setFontSize(11).setTextColor(soft[0], soft[1], soft[2]);
+                doc.text(k, M, y);
+                const c = o.color || ink;
+                doc.setFont('helvetica', o.bold ? 'bold' : 'normal').setTextColor(c[0], c[1], c[2]);
+                doc.text(String(v), W - M, y, { align: 'right' });
+                y += 19;
+            };
+            const heading = txt => { y += 12; guard(22); doc.setFont('helvetica', 'bold').setFontSize(13).setTextColor(teal[0], teal[1], teal[2]); doc.text(txt, M, y); y += 8; doc.setDrawColor(228, 223, 210).setLineWidth(0.7).line(M, y, W - M, y); y += 14; };
+            const money = n => n != null ? '$' + fmt(n) : '—';
+
+            // Header
+            doc.setFont('helvetica', 'bold').setFontSize(22).setTextColor(teal[0], teal[1], teal[2]);
+            doc.text('Unspun', M, y);
+            doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(soft[0], soft[1], soft[2]);
+            doc.text('Ad-spend audit', W - M, y, { align: 'right' });
+            y += 10;
+            doc.setDrawColor(teal[0], teal[1], teal[2]).setLineWidth(1.5).line(M, y, W - M, y);
+            y += 22;
+            line('Your ' + platform + ' Ads audit', { size: 16, bold: true });
+            line(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }), { size: 10, color: soft });
+
+            const fee = data.agencyFee, spend = data.adSpend;
+            const total = (fee != null && spend != null) ? fee + spend : spend;
+            const blended = window._blended;
+
+            heading('Marketing spend this month');
+            kv('Agency fee', money(fee));
+            kv('Actual ' + platform + ' ad spend', money(spend));
+            kv('Total cost this month', money(total), { bold: true, color: red });
+
+            heading('What you got');
+            kv('Impressions', data.impressions != null ? fmtInt(data.impressions) : '—');
+            kv('Clicks', data.clicks != null ? fmtInt(data.clicks) : '—');
+            kv('Cost per click (CPC)', money(data.cpc));
+            const ctr = (data.impressions && data.clicks) ? (data.clicks / data.impressions) * 100 : null;
+            kv('Click-through rate (CTR)', ctr != null ? ctr.toFixed(2) + '%' : '—');
+            kv('Conversions', data.conversions != null ? fmtInt(data.conversions) : '—');
+            kv('Ad-only cost per conversion', money(data.costPerConversion));
+            kv('Blended cost per conversion', money(blended), { bold: true });
+
+            // Verdict
+            const value = parseFloat((document.getElementById('value') || {}).value) || 0;
+            if (blended != null && value > 0) {
+                const pl = value - blended;
+                heading('The verdict');
+                kv('A new customer is worth (to you)', money(value));
+                kv('Real cost to acquire one', money(blended));
+                if (pl >= 0) {
+                    kv('Profit per conversion', '+' + money(pl), { bold: true, color: green });
+                    line('You\'re making money on these conversions.', { size: 11, color: green, bold: true });
+                } else {
+                    kv('Loss per conversion', '-' + money(Math.abs(pl)), { bold: true, color: red });
+                    line('You\'re losing money on these conversions — every new customer costs more than they\'re worth.', { size: 11, color: red, bold: true });
+                }
+            }
+
+            heading('Plain-English glossary');
+            const glossary = [
+                ['Agency fee', 'What you pay the marketing company to manage your ads.'],
+                ['Actual ad spend', 'Real dollars ' + platform + ' charged to show your ads.'],
+                ['Cost per conversion', 'Ad dollars spent to get one conversion (call, form, booking).'],
+                ['Blended cost', 'The real total cost per conversion, agency fee included.'],
+                ['CTR', 'Share of people who saw your ad and clicked it.']
+            ];
+            glossary.forEach(([t, d]) => {
+                guard(30);
+                doc.setFont('helvetica', 'bold').setFontSize(10.5).setTextColor(ink[0], ink[1], ink[2]);
+                doc.text(t, M, y); y += 14;
+                doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(soft[0], soft[1], soft[2]);
+                doc.splitTextToSize(d, W - M * 2).forEach(l => { guard(13); doc.text(l, M, y); y += 13; });
+                y += 6;
+            });
+
+            heading('Notes / questions for your agency');
+            guard(90);
+            doc.setDrawColor(210, 205, 190).setLineWidth(0.7);
+            for (let i = 0; i < 4; i++) { doc.line(M, y, W - M, y); y += 22; }
+
+            // Footer on every page
+            const pages = doc.internal.getNumberOfPages();
+            for (let p = 1; p <= pages; p++) {
+                doc.setPage(p);
+                doc.setFont('helvetica', 'normal').setFontSize(9).setTextColor(soft[0], soft[1], soft[2]);
+                doc.text('Generated at unspun.report — your files never left your browser.', M, H - 30);
+                doc.text(p + ' / ' + pages, W - M, H - 30, { align: 'right' });
+            }
+
+            const stamp = new Date().toISOString().slice(0, 10);
+            doc.save('unspun-audit-' + stamp + '.pdf');
+        }
+
         // Module scripts execute after the DOM is parsed, so DOMContentLoaded may have
         // already fired — call directly instead of listening for it.
         if (window.location.hash === '#demo') {
@@ -2260,25 +2694,99 @@
             setText('r-cvr-label', cvr != null ? (cvr >= 10 ? 'Strong — your landing page is converting well' : cvr >= 3 ? 'Average — your offer or page could be improved' : 'Low — people are clicking but not taking action') : '—');
             setText('r-blended', blended != null ? fmt(blended) : '—');
             window._blended = blended;
+            renderParseSummary();
+            // Next-steps always accompanies a report; hide the pricing nudge for
+            // unlimited accounts (they don't buy packs).
+            const nextSteps = document.getElementById('next-steps');
+            if (nextSteps) nextSteps.style.display = 'block';
+            const nextPricing = document.getElementById('next-pricing');
+            if (nextPricing) nextPricing.style.display = (currentCredits === -1) ? 'none' : 'block';
+            // Show the verdict + math immediately with the current customer value, so the
+            // headline answer is visible without making the user hunt for a button.
+            calculate();
             document.getElementById('report').style.display = 'block';
         }
 
+        // Shows the user exactly which numbers we pulled from their files, with a
+        // confidence badge — turns an opaque result into something they can trust and
+        // sanity-check. "High" = all four core ad metrics read straight from the file.
+        function renderParseSummary() {
+            const el = document.getElementById('parse-summary');
+            if (!el) return;
+            const core = ['adSpend', 'clicks', 'conversions', 'impressions'];
+            const high = core.every(k => data[k] != null);
+            const platform = data.platform === 'meta' ? 'Meta' : 'Google';
+            const parts = [];
+            if (data.agencyFee != null) parts.push('agency fee $' + fmt(data.agencyFee));
+            if (data.adSpend != null) parts.push('ad spend $' + fmt(data.adSpend));
+            if (data.clicks != null) parts.push(fmtInt(data.clicks) + ' clicks');
+            if (data.conversions != null) parts.push(fmtInt(data.conversions) + ' conversions');
+            if (data.impressions != null) parts.push(fmtInt(data.impressions) + ' impressions');
+            const lead = demoActive ? 'Read from the sample data' : 'Read from your ' + platform + ' report';
+            let html = '<div class="ps-head"><span class="ps-title">' + lead + '</span>'
+                + '<span class="conf-badge ' + (high ? 'high' : 'medium') + '">'
+                + (high ? 'High confidence' : 'Partial read') + '</span></div>'
+                + '<div class="ps-fields">' + (parts.length ? parts.join(' &nbsp;·&nbsp; ') : 'No metrics found') + '</div>';
+            const labels = { adSpend: 'total ad spend', clicks: 'clicks', conversions: 'conversions', impressions: 'impressions' };
+            const missing = core.filter(k => data[k] == null).map(k => labels[k]);
+            if (missing.length) {
+                html += '<div class="ps-note">Couldn\'t read: ' + missing.join(', ')
+                    + ' — the verdict still works, but double-check these. Tip: export the full monthly Campaigns report (not a summary).</div>';
+            }
+            el.innerHTML = html;
+            el.style.display = 'block';
+        }
+
+        // Live P/L verdict. Runs on every keystroke (oninput) for instant scenario
+        // planning, so it stays cheap and does NOT fire analytics — trackValue() does
+        // that once, when the user commits a value.
         function calculate() {
             const value = parseFloat(document.getElementById('value').value) || 0;
-            const blended = window._blended;
-            if (blended == null) return;
+            if (window._blended == null) return;
+            // Round the true cost to cents first, then derive P/L from it, so the numbers
+            // shown (true cost + profit = customer value) always reconcile to the penny.
+            const blended = Math.round(window._blended * 100) / 100;
             const pl = value - blended;
             const resultDiv = document.getElementById('result');
             const lossCta = document.getElementById('loss-cta');
-            if (pl > 0) {
-                resultDiv.innerHTML = `Direct P/L: +$${pl.toFixed(2)} per conversion — You're making money.`;
+            const mathEl = document.getElementById('pl-math');
+
+            // Transparent math: total spend ÷ conversions = true cost, vs. customer value.
+            if (mathEl) {
+                const fee = data.agencyFee, spend = data.adSpend, conv = data.conversions;
+                const total = (fee != null && spend != null) ? fee + spend : spend;
+                if (total != null && conv) {
+                    mathEl.innerHTML =
+                        '<span class="plm-line">' + (fee != null ? '$' + fmt(fee) + ' agency fee + ' : '')
+                          + '$' + fmt(spend) + ' ad spend = <strong>$' + fmt(total) + '</strong> total spend</span>'
+                        + '<span class="plm-line">÷ ' + fmtInt(conv) + ' conversions = <strong>$' + fmt(blended) + '</strong> true cost per customer</span>'
+                        + '<span class="plm-line">a customer worth <strong>$' + fmt(value) + '</strong> → '
+                          + (pl >= 0 ? '<strong style="color:var(--green)">+$' + fmt(pl) + ' profit</strong>'
+                                     : '<strong style="color:var(--red)">−$' + fmt(Math.abs(pl)) + ' loss</strong>') + ' each</span>';
+                    mathEl.style.display = 'flex';
+                } else {
+                    mathEl.style.display = 'none';
+                }
+            }
+
+            if (pl >= 0) {
+                resultDiv.innerHTML = `You keep <strong>$${fmt(pl)}</strong> on every new customer — you're making money.`;
                 resultDiv.style.color = 'var(--green)';
                 if (lossCta) lossCta.style.display = 'none';
             } else {
-                resultDiv.innerHTML = `Direct P/L: -$${Math.abs(pl).toFixed(2)} per conversion — You're losing money on these conversions.`;
+                resultDiv.innerHTML = `Every new customer costs <strong>$${fmt(Math.abs(pl))}</strong> more than they're worth — you're losing money.`;
                 resultDiv.style.color = 'var(--red)';
                 if (lossCta) lossCta.style.display = 'block';
             }
+        }
+
+        // Fires once when the user commits a value (blur/enter), not on every keystroke,
+        // so scenario planning doesn't spam analytics.
+        function trackValue() {
+            const value = parseFloat(document.getElementById('value').value) || 0;
+            const blended = window._blended;
+            if (blended == null) return;
+            track('customer_value_entered', { value, verdict: value - blended >= 0 ? 'profit' : 'loss' });
         }
 
         function parseNum(str) {
@@ -2299,9 +2807,24 @@
         window.signInFromReport = signInFromReport;
         window.signOut = signOut;
         window.calculate = calculate;
+        window.trackValue = trackValue;
         window.applyManualFee = applyManualFee;
         window.runDemo = runDemo;
         window.exitDemo = exitDemo;
+        window.runSampleData = runSampleData;
+        window.revealSave = revealSave;
+        window.downloadPDF = downloadPDF;
+
+        // One delegated listener covers every pricing/checkout intent: the post-audit
+        // nudge, the no-credits gate packs, and the pricing-section pack links.
+        document.addEventListener('click', (e) => {
+            const a = e.target.closest ? e.target.closest('a') : null;
+            if (!a) return;
+            if (a.id === 'next-pricing') { track('pricing_cta_clicked', { where: 'post_audit' }); return; }
+            if (/buy\.stripe\.com/.test(a.href || '')) {
+                track('pack_purchase_started', { where: a.closest('#no-credits-gate') ? 'no_credits_gate' : 'pricing' });
+            }
+        });
 
         initAuth();
     </script>

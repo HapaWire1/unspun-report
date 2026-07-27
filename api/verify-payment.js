@@ -41,45 +41,30 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: `Unrecognized payment amount: ${session.amount_total}` });
   }
 
-  // 3. Idempotency — don't credit twice for the same session
-  const existingRes = await fetch(
-    `${SUPABASE_URL}/rest/v1/purchases?stripe_session_id=eq.${encodeURIComponent(session_id)}&select=id`,
-    { headers: { Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`, apikey: SUPABASE_SERVICE_KEY } }
-  );
-  const existing = await existingRes.json();
-  if (existing.length > 0) {
-    return res.status(200).json({ already_processed: true, message: 'Credits already applied' });
-  }
-
-  // 4. Log the purchase
-  await fetch(`${SUPABASE_URL}/rest/v1/purchases`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-      apikey: SUPABASE_SERVICE_KEY,
-      'Content-Type': 'application/json',
-      Prefer: 'return=minimal'
-    },
-    body: JSON.stringify({ user_id: user.id, stripe_session_id: session_id, credits_added: creditsToAdd })
-  });
-
-  // 5. Atomically add the credits this pack is worth
-  const rpcRes = await fetch(`${SUPABASE_URL}/rest/v1/rpc/increment_credits`, {
+  // 3. Atomically record the purchase AND grant the credits in one transaction.
+  // redeem_purchase inserts the purchases row (unique on stripe_session_id) and
+  // increments the buyer's credits together, so a session can never be credited
+  // twice (idempotent + race-safe), and a failed credit rolls back the purchase
+  // row instead of leaving a paid-but-uncredited account permanently locked.
+  const redeemRes = await fetch(`${SUPABASE_URL}/rest/v1/rpc/redeem_purchase`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
       apikey: SUPABASE_SERVICE_KEY,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ user_id: user.id, amount: creditsToAdd })
+    body: JSON.stringify({ p_user_id: user.id, p_session_id: session_id, p_credits: creditsToAdd })
   });
-
-  if (!rpcRes.ok) {
-    const err = await rpcRes.text();
-    return res.status(500).json({ error: 'Failed to add credits', detail: err });
+  if (!redeemRes.ok) {
+    const err = await redeemRes.text();
+    return res.status(500).json({ error: 'Failed to redeem purchase', detail: err });
+  }
+  const redeem = await redeemRes.json();
+  if (redeem?.status === 'already_processed') {
+    return res.status(200).json({ already_processed: true, message: 'Credits already applied' });
   }
 
-  // 6. Referral reward — +1 credit to whoever referred this buyer, once, on their first purchase.
+  // 4. Referral reward — +1 credit to whoever referred this buyer, once, on their first purchase.
   // Best-effort: never let a referral hiccup block the buyer's own confirmed purchase.
   try {
     const profileRes = await fetch(

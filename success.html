@@ -55,9 +55,11 @@
       const session_id = params.get('session_id');
 
       if (!session) {
-        document.getElementById('credits-badge').textContent = 'Sign in to claim your credits';
-        document.getElementById('status').textContent = 'You need to be signed in. Go back to the main page and sign in, then return here.';
-        document.getElementById('status').className = 'status error';
+        // Stash the Stripe session so the credits can be claimed automatically once
+        // the buyer signs in on the homepage (index.html reclaims it on sign-in).
+        if (session_id) localStorage.setItem('unspun_pending_purchase', session_id);
+        document.getElementById('credits-badge').textContent = 'Almost there — sign in to claim';
+        document.getElementById('status').innerHTML = 'Your payment went through. <a href="/#tool" style="color:var(--teal); font-weight:600;">Head to the homepage and sign in</a> (or create an account) — your audits will be added to whichever account you sign into.';
         return;
       }
 
@@ -76,9 +78,12 @@
         const result = await res.json();
 
         if (result.already_processed) {
+          localStorage.removeItem('unspun_pending_purchase');
           document.getElementById('credits-badge').textContent = 'Credits already applied ✓';
         } else if (result.credits_added) {
+          localStorage.removeItem('unspun_pending_purchase');
           const n = result.credits_added;
+          try { if (typeof window.va === 'function') window.va('event', { name: 'pack_purchase_completed', data: { credits: n } }); } catch (_) {}
           document.getElementById('credits-badge').textContent = `+${n} audit${n === 1 ? '' : 's'} added to your account ✓`;
         } else {
           throw new Error(result.error || 'Unknown error');

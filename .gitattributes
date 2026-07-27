@@ -1,0 +1,9 @@
+# Binary assets — never apply text/EOL conversion. The sample invoice PDF is
+# all-ASCII (no NUL bytes), so Git would otherwise treat it as text and rewrite
+# LF->CRLF on checkout, corrupting the byte offsets pdf.js relies on.
+*.pdf  binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
