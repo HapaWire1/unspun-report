@@ -80,6 +80,10 @@
         if (result.already_processed) {
           localStorage.removeItem('unspun_pending_purchase');
           document.getElementById('credits-badge').textContent = 'Credits already applied ✓';
+        } else if (result.subscribed) {
+          localStorage.removeItem('unspun_pending_purchase');
+          try { if (typeof window.va === 'function') window.va('event', { name: 'subscription_started' }); } catch (_) {}
+          document.getElementById('credits-badge').textContent = 'Unspun Pro active — unlimited audits ✓';
         } else if (result.credits_added) {
           localStorage.removeItem('unspun_pending_purchase');
           const n = result.credits_added;

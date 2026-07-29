@@ -32,7 +32,36 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Payment not completed' });
   }
 
-  // Three packs, each granting a different number of credits: 3/$79, 6/$139, 9/$179.
+  // Subscription checkout (Unspun Pro, $79/mo or $790/yr) → unlimited while subscribed.
+  // Keyed off amount_subtotal for the same coupon-immunity reason as packs below.
+  if (session.mode === 'subscription') {
+    const VALID_SUB_SUBTOTALS = new Set([7900, 79000]);
+    if (!VALID_SUB_SUBTOTALS.has(session.amount_subtotal)) {
+      return res.status(400).json({
+        error: `Unrecognized subscription amount: subtotal=${session.amount_subtotal}`
+      });
+    }
+    const subRes = await fetch(`${SUPABASE_URL}/rest/v1/rpc/redeem_subscription`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+        apikey: SUPABASE_SERVICE_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ p_user_id: user.id, p_session_id: session_id })
+    });
+    if (!subRes.ok) {
+      const err = await subRes.text();
+      return res.status(500).json({ error: 'Failed to activate subscription', detail: err });
+    }
+    const sub = await subRes.json();
+    if (sub?.status === 'already_processed') {
+      return res.status(200).json({ already_processed: true, message: 'Subscription already active' });
+    }
+    return res.status(200).json({ subscribed: true });
+  }
+
+  // Legacy one-time packs (grandfathered): 3/$79, 6/$139, 9/$179.
   // Key off amount_SUBTOTAL (the pre-discount list price), NOT amount_total. A promotion
   // code applied at Stripe checkout — e.g. the REF5 referral code (-$5) advertised on the
   // site — lowers amount_total (7900 -> 7400) but leaves amount_subtotal at the list price.

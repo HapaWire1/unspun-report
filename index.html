@@ -1583,15 +1583,16 @@
             </details>
         </div>
 
-        <!-- Signed in, no credits -->
+        <!-- Shown when audits run out: signed-in with 0 credits, or anonymous
+             visitor whose one free audit is used. Copy works for both. -->
         <div class="no-credits-gate" id="no-credits-gate" style="display:none">
-            <h3>You're out of audits</h3>
-            <p>Pick a pack to keep going — no subscription, no expiry.</p>
+            <h3>That was your free audit</h3>
+            <p>Go Pro for unlimited audits, saved history, and month-over-month comparison — cancel anytime.</p>
             <div class="gate-pack-row">
-                <a href="https://buy.stripe.com/7sYbJ03Ic3SDe4688PaEE02" class="primary" style="display:inline-block; text-align:center; text-decoration:none; width:auto; padding:13px 22px;">3 for $79</a>
-                <a href="https://buy.stripe.com/bJe4gy7Ys74P1hk2OvaEE01" class="primary" style="display:inline-block; text-align:center; text-decoration:none; width:auto; padding:13px 22px;">6 for $139</a>
-                <a href="https://buy.stripe.com/bJe9ASemQ0Gre4660HaEE03" class="primary" style="display:inline-block; text-align:center; text-decoration:none; width:auto; padding:13px 22px;">9 for $179</a>
+                <a href="https://buy.stripe.com/REPLACE_WITH_MONTHLY_LINK" class="primary" style="display:inline-block; text-align:center; text-decoration:none; width:auto; padding:13px 22px;">Go Pro — $79/mo</a>
+                <a href="https://buy.stripe.com/REPLACE_WITH_YEARLY_LINK" class="primary" style="display:inline-block; text-align:center; text-decoration:none; width:auto; padding:13px 22px; opacity:0.85;">Annual — $790/yr</a>
             </div>
+            <p style="font-size:13px; color:var(--ink-soft); margin-top:12px;">Already subscribed on another device? Sign in and your unlimited access follows you.</p>
         </div>
 
         <div id="report" style="display:none">
@@ -1601,7 +1602,7 @@
             </div>
 
             <div class="demo-banner" id="anon-save-banner" style="display:none">
-                <strong>That's your real number.</strong> Run as many audits as you like — free, no sign-in needed. Want to keep this one and compare month over month?
+                <strong>That's your real number.</strong> This audit was on us. Want to keep it, run one every month, and see the trend? Unspun Pro is $79/mo — or save this report to your email first.
                 <div class="save-actions" style="margin-top:12px;">
                     <button class="btn-ghost" type="button" onclick="revealSave()">Save &amp; email me this report</button>
                 </div>
@@ -1687,7 +1688,7 @@
                     </a>
                     <a class="next-card" href="#pricing" id="next-pricing">
                         <strong>Track it month over month →</strong>
-                        <span>Audit packs start at $79 for 3 — no subscription, no expiry. Spot the trend before it costs you.</span>
+                        <span>Unspun Pro is $79/mo for unlimited audits and saved history. Spot the trend before it costs you.</span>
                     </a>
                 </div>
             </div>
@@ -1704,42 +1705,33 @@
     <!-- PRICING -->
     <section class="section" id="pricing">
         <p class="section-label">Pricing</p>
-        <h2>Pay once. <em>No subscription.</em></h2>
-        <p class="section-intro" style="margin: 0 auto;">Your first audit is free. After that, buy audits in packs — use them whenever you need them, no expiry, no auto-renew.</p>
-        <p class="section-intro" id="referral-banner" style="display:none; margin: 12px auto 0; font-weight: 600; color: var(--teal-deep);">You were referred — enter code <strong>REF5</strong> at checkout for $5 off your first pack.</p>
+        <h2>One plan. <em>Unlimited audits.</em></h2>
+        <p class="section-intro" style="margin: 0 auto;">Your first audit is free — no sign-in, no card. Go Pro to audit every month, keep your history, and catch the moment your numbers turn.</p>
+        <p class="section-intro" id="referral-banner" style="display:none; margin: 12px auto 0; font-weight: 600; color: var(--teal-deep);">You were referred — enter code <strong>REF5</strong> at checkout for $5 off your first month.</p>
         <div class="pricing-grid">
-            <div class="pricing-card">
-                <div class="price"><sup>$</sup>79</div>
-                <div class="price-desc">3 audits · $26.33 each</div>
-                <ul class="pricing-features">
-                    <li>Upload PDF or CSV reports</li>
-                    <li>Google Ads &amp; Meta Ads</li>
-                    <li>Full spend breakdown</li>
-                    <li>Profit / loss verdict</li>
-                    <li>Plain-English glossary</li>
-                </ul>
-                <a data-pack="3" href="https://buy.stripe.com/7sYbJ03Ic3SDe4688PaEE02" class="primary">Get 3 audits — $79</a>
-            </div>
             <div class="pricing-card featured">
-                <div class="pricing-badge">Most popular</div>
-                <div class="price"><sup>$</sup>139</div>
-                <div class="price-desc">6 audits · $23.17 each</div>
+                <div class="pricing-badge">Unspun Pro</div>
+                <div class="price"><sup>$</sup>79<span style="font-size:18px; color:var(--ink-soft);">/mo</span></div>
+                <div class="price-desc">Unlimited audits · cancel anytime</div>
                 <ul class="pricing-features">
-                    <li>Everything in the 3-pack</li>
-                    <li>Best rate for one business</li>
-                    <li>Enough to compare agency quotes</li>
+                    <li>Unlimited audits, every month</li>
+                    <li>Google Ads &amp; Meta Ads · PDF or CSV</li>
+                    <li>Saved history &amp; month-over-month comparison</li>
+                    <li>Profit / loss verdict + plain-English glossary</li>
+                    <li>Multiple locations, one account</li>
                 </ul>
-                <a data-pack="6" href="https://buy.stripe.com/bJe4gy7Ys74P1hk2OvaEE01" class="primary">Get 6 audits — $139</a>
+                <a data-plan="monthly" href="https://buy.stripe.com/REPLACE_WITH_MONTHLY_LINK" class="primary">Go Pro — $79/mo</a>
             </div>
             <div class="pricing-card">
-                <div class="price"><sup>$</sup>179</div>
-                <div class="price-desc">9 audits · $19.89 each</div>
+                <div class="pricing-badge" style="background:var(--ink-soft);">Annual</div>
+                <div class="price"><sup>$</sup>790<span style="font-size:18px; color:var(--ink-soft);">/yr</span></div>
+                <div class="price-desc">2 months free vs. monthly</div>
                 <ul class="pricing-features">
-                    <li>Everything in the 6-pack</li>
-                    <li>Lowest per-audit rate</li>
-                    <li>Multiple locations or monthly check-ins</li>
+                    <li>Everything in Pro</li>
+                    <li>One invoice for the year</li>
+                    <li>Locks your rate</li>
                 </ul>
-                <a data-pack="9" href="https://buy.stripe.com/bJe9ASemQ0Gre4660HaEE03" class="primary">Get 9 audits — $179</a>
+                <a data-plan="yearly" href="https://buy.stripe.com/REPLACE_WITH_YEARLY_LINK" class="primary">Go annual — $790/yr</a>
             </div>
         </div>
         <p class="pricing-note">First audit is always free. No card required.</p>
@@ -1749,7 +1741,7 @@
     <section class="section" id="referral">
         <p class="section-label">Referral program</p>
         <h2>Know another owner <em>in the dark?</em></h2>
-        <p class="section-intro" style="margin: 0 auto 32px;">Send them your referral link. When they run their first paid audit, you get <strong style="color:var(--teal-deep)">$10 credit</strong> toward your next pack. They get <strong style="color:var(--teal-deep)">$5 off</strong> theirs.</p>
+        <p class="section-intro" style="margin: 0 auto 32px;">Send them your referral link. When they go Pro, you get <strong style="color:var(--teal-deep)">$10 credit</strong> toward your next month. They get <strong style="color:var(--teal-deep)">$5 off</strong> their first.</p>
         <a class="btn-primary" style="display:inline-block; max-width:330px;" href="mailto:support@unspun.report?subject=Set%20up%20my%20referral%20link&body=Please%20set%20up%20my%20Unspun%20referral%20link.%20My%20account%20email%20is%3A%20">Get my referral link</a>
         <p style="font-size:13px; color:var(--ink-soft); margin-top:12px;">We set referral links up personally right now — one email, usually same-day.</p>
     </section>
@@ -2037,12 +2029,12 @@
                     return;
                 }
 
-                if (res.ok && (result.credits_added || result.already_processed)) {
-                    // Success — credits are on the account. Clear the stash and refresh UI.
+                if (res.ok && (result.credits_added || result.already_processed || result.subscribed)) {
+                    // Success — credits/subscription are on the account. Clear the stash and refresh UI.
                     localStorage.removeItem('unspun_pending_purchase');
                     const note = document.getElementById('reclaim-note');
                     if (note) note.style.display = 'none';
-                    track('purchase_reclaimed', { credits: result.credits_added || 0 });
+                    track('purchase_reclaimed', { credits: result.subscribed ? -1 : (result.credits_added || 0) });
                     const { data: profile } = await supabase
                         .from('profiles').select('audit_credits').eq('id', currentUser.id).single();
                     if (profile) {
@@ -2215,7 +2207,17 @@
                 files: files.length,
                 types: [...new Set(files.map(f => (f.name.split('.').pop() || '').toLowerCase()))].join(',')
             });
-            if (currentUser && currentCredits === 0) { setStatus('No audits remaining. Purchase more to continue.', 'error'); return; }
+            if (currentUser && currentCredits === 0) { setStatus('No audits remaining. Go Pro to continue.', 'error'); return; }
+            // One real audit free for anonymous visitors — the value-first hook. The
+            // second upload asks them to subscribe. localStorage is a soft gate by
+            // design: the free tier is a marketing cost, not a security boundary.
+            if (!currentUser && localStorage.getItem('unspun_free_audit_used')) {
+                track('free_audit_gate_shown');
+                document.getElementById('tool-inner').style.display = 'none';
+                document.getElementById('no-credits-gate').style.display = 'block';
+                document.getElementById('no-credits-gate').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
             setStatus('', '');
             // Clear any gate left over from a prior attempt so a fresh run starts clean.
             document.getElementById('no-credits-gate').style.display = 'none';
@@ -2263,11 +2265,11 @@
                     confidence: core.every(k => data[k] != null) ? 'high' : 'partial'
                 });
                 if (!currentUser) {
-                    // Anonymous audits are free and unlimited — it's client-side math on
-                    // the user's own files, so it costs us nothing and keeps first-run
-                    // bounce low. Sign-up is only ever offered afterward, as an optional
-                    // save/share (see #anon-save-banner), never forced.
+                    // First anonymous audit is free — full value before any wall (the
+                    // bounce-killer). Mark it used so the next upload hits the Pro gate.
+                    // The sample-data demo bypasses this path and stays always-free.
                     displayReport();
+                    localStorage.setItem('unspun_free_audit_used', '1');
                     track('audit_completed', { auth: 'anon' });
                     setStatus('Files processed successfully.', 'success');
                 } else {
@@ -2816,13 +2818,18 @@ Total - all campaigns,52456,1124,2.14%,1.97,2217.41,34,65.22`;
         window.downloadPDF = downloadPDF;
 
         // One delegated listener covers every pricing/checkout intent: the post-audit
-        // nudge, the no-credits gate packs, and the pricing-section pack links.
+        // nudge, the no-credits/free-audit gate, and the pricing-section plan links.
+        // (Event name kept as pack_purchase_started for analytics continuity across
+        // the pack->subscription pricing change; `plan` distinguishes the new SKUs.)
         document.addEventListener('click', (e) => {
             const a = e.target.closest ? e.target.closest('a') : null;
             if (!a) return;
             if (a.id === 'next-pricing') { track('pricing_cta_clicked', { where: 'post_audit' }); return; }
             if (/buy\.stripe\.com/.test(a.href || '')) {
-                track('pack_purchase_started', { where: a.closest('#no-credits-gate') ? 'no_credits_gate' : 'pricing' });
+                track('pack_purchase_started', {
+                    where: a.closest('#no-credits-gate') ? 'no_credits_gate' : 'pricing',
+                    plan: a.dataset.plan || 'unknown'
+                });
             }
         });
 
