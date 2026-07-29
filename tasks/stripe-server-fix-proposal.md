@@ -182,7 +182,16 @@ themselves change in Stripe.
 > manual, not a Stripe coupon). Follow-up: switch the lookup to the price ID / line item.~~
 > **(Superseded — the discount was NOT manual; fixed via `amount_subtotal` above.)**
 
-**Data remediation still needed (manual, in Stripe):** any completed payment of `$74 / $134 / $174`
-made *before this fix deploys* was charged but never credited. Check the Stripe dashboard for
-`succeeded` payments at those amounts, match each `session_id` against the `purchases` table, and
-manually grant credits to any buyer with no `purchases` row.
+**Data remediation still needed (manual, in Stripe):** any purchase made *before this fix
+deploys* whose charged `amount_total` was not exactly `7900 / 13900 / 17900` was charged but
+never credited (old code returned `400`). Two ways that happened:
+- **Referral discount** — REF5 applied (`-$5` → `7400 / 13400 / 17400`).
+- **Automatic tax** — Stripe auto-tax is enabled on these links ("Tax — enter address to
+  calculate" shows at checkout), so any taxable buyer paid `list + tax` (e.g. `> 7900`).
+
+Because the paid path was never live-tested end to end, treat **every** completed purchase as
+suspect. Robust criterion (amount-agnostic): pull all `succeeded` Checkout sessions for these
+three payment links from the Stripe dashboard and match each `session_id` against the
+`purchases` table — **any session with no `purchases` row was charged but never credited.**
+Grant those buyers their credits manually. (After this fix, re-running that buyer's reclaim
+would also credit them correctly, since `amount_subtotal` now matches regardless of tax/discount.)
