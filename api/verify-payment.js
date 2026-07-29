@@ -33,12 +33,19 @@ export default async function handler(req, res) {
   }
 
   // Three packs, each granting a different number of credits: 3/$79, 6/$139, 9/$179.
-  // Map by the actual amount charged rather than assuming one fixed amount — this is
-  // what has to change if any of these prices ever change in Stripe.
-  const CREDITS_BY_AMOUNT_CENTS = { 7900: 3, 13900: 6, 17900: 9 };
-  const creditsToAdd = CREDITS_BY_AMOUNT_CENTS[session.amount_total];
+  // Key off amount_SUBTOTAL (the pre-discount list price), NOT amount_total. A promotion
+  // code applied at Stripe checkout — e.g. the REF5 referral code (-$5) advertised on the
+  // site — lowers amount_total (7900 -> 7400) but leaves amount_subtotal at the list price.
+  // Keying off amount_total silently broke crediting for every referred buyer: they were
+  // charged the discounted amount and granted zero credits. amount_subtotal is immune to
+  // any coupon (fixed or percentage), so referral discounts and crediting now coexist.
+  // This still needs updating if the list prices themselves ever change in Stripe.
+  const CREDITS_BY_SUBTOTAL_CENTS = { 7900: 3, 13900: 6, 17900: 9 };
+  const creditsToAdd = CREDITS_BY_SUBTOTAL_CENTS[session.amount_subtotal];
   if (!creditsToAdd) {
-    return res.status(400).json({ error: `Unrecognized payment amount: ${session.amount_total}` });
+    return res.status(400).json({
+      error: `Unrecognized payment amount: subtotal=${session.amount_subtotal} total=${session.amount_total}`
+    });
   }
 
   // 3. Atomically record the purchase AND grant the credits in one transaction.

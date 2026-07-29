@@ -164,8 +164,25 @@ still used for the referral reward and stays as-is.
 Steps 1–3 are backward-compatible with the current code, so they can go first safely. The new
 `verify-payment.js` (step 4) must not deploy before the function exists.
 
-## Not in this change (tracked separately)
+## H2 — FIXED 2026-07-28 (the "manual discount" assumption was wrong)
 
-- **H2** — amount→credits still keys off `amount_total`. Fine today (referral discount is
-  manual, not a Stripe coupon). Follow-up: switch the lookup to the **price ID / line item**
-  so a future Stripe-applied discount can't break crediting.
+The earlier note below was incorrect. **REF5 is a live Stripe promotion code**, and the site's
+referral banner (`index.html:1709`) actively tells referred buyers to enter it at checkout.
+Verified against live Stripe checkout: entering REF5 drops the 3-pack from `$79.00 -> $74.00`
+(`amount_total = 7400`), which is **not** in `{7900,13900,17900}` -> `verify-payment` returned
+`400 "Unrecognized payment amount"` -> the buyer was charged the discounted price and granted
+**zero credits**. This silently broke crediting for every referred purchase.
+
+**Fix applied:** key credits off `session.amount_subtotal` (pre-discount list price) instead of
+`session.amount_total`. `amount_subtotal` is immune to any coupon (fixed or percentage), so the
+referral discount and crediting now coexist. Still requires a map update only if the list prices
+themselves change in Stripe.
+
+> ~~**H2** — amount→credits still keys off `amount_total`. Fine today (referral discount is
+> manual, not a Stripe coupon). Follow-up: switch the lookup to the price ID / line item.~~
+> **(Superseded — the discount was NOT manual; fixed via `amount_subtotal` above.)**
+
+**Data remediation still needed (manual, in Stripe):** any completed payment of `$74 / $134 / $174`
+made *before this fix deploys* was charged but never credited. Check the Stripe dashboard for
+`succeeded` payments at those amounts, match each `session_id` against the `purchases` table, and
+manually grant credits to any buyer with no `purchases` row.
