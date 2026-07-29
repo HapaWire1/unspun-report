@@ -1,2 +1,8 @@
 Old site DB
 *.gdoc
+tasks
+docs
+sql
+scripts
+*.md
+.claude
