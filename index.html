@@ -2919,7 +2919,8 @@ Total - all campaigns,52456,1124,2.14%,1.97,2217.41,34,65.22`;
           if (f.dataset.kind === 'report_unlock' && window._unspunAudit) body.audit_json = JSON.stringify(window._unspunAudit);
           btn.disabled = true; s.className = 'lf-status'; s.textContent = 'Sending…';
           try {
-            var r = await fetch('/api/lead', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+            var EP = /workers\.dev$/.test(location.hostname) ? '/api/lead' : 'https://unspun-preview.tyler-alfred11.workers.dev/api/lead';
+            var r = await fetch(EP, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
             var j = await r.json(); if (!r.ok || !j.ok) throw new Error(j.error || 'Something went wrong');
             var c = {}; ['name','business','email','phone','website','spend_band','has_agency'].forEach(function (k) { if (body[k]) c[k] = body[k]; });
             localStorage.setItem('unspun_contact', JSON.stringify(c));
