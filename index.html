@@ -4,20 +4,20 @@
     <title>Unspun — Find out what your ad spend actually buys</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Upload your agency invoice and ad report. Unspun tells you — in plain English — what a new customer actually costs you. First audit free.">
+    <meta name="description" content="Upload your agency invoice and ad report. Unspun tells you — in plain English — what a new customer actually costs you. Free audit, or send your website and we do it for you.">
     <link rel="canonical" href="https://unspun.report/">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://unspun.report/">
     <meta property="og:site_name" content="Unspun">
     <meta property="og:title" content="Unspun — Find out what your ad spend actually buys">
-    <meta property="og:description" content="Upload your agency invoice and ad report. Unspun tells you — in plain English — what a new customer actually costs you. First audit free.">
+    <meta property="og:description" content="Upload your agency invoice and ad report. Unspun tells you — in plain English — what a new customer actually costs you. Free audit, or send your website and we do it for you.">
     <meta property="og:image" content="https://unspun.report/og-image.png">
     <meta property="og:image:width" content="2400">
     <meta property="og:image:height" content="1260">
     <meta property="og:image:alt" content="Unspun audit receipt showing a real client paid $3,531.25/mo for a true cost of $176.56 per customer — worth $149, losing money.">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Unspun — Find out what your ad spend actually buys">
-    <meta name="twitter:description" content="Upload your agency invoice and ad report. Unspun tells you — in plain English — what a new customer actually costs you. First audit free.">
+    <meta name="twitter:description" content="Upload your agency invoice and ad report. Unspun tells you — in plain English — what a new customer actually costs you. Free audit, or send your website and we do it for you.">
     <meta name="twitter:image" content="https://unspun.report/og-image.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1276,6 +1276,23 @@
             #report th { background: #eee !important; }
             #report .highlight { color: #0A7C66 !important; }
         }
+        .lead-sec { max-width: 860px; margin: 0 auto; }
+        .lead-form { max-width: 760px; margin: 0 auto; text-align:left; }
+        .lf-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(230px,1fr)); gap:12px 16px; margin-bottom:12px; }
+        .lead-form label { display:flex; flex-direction:column; font-size:13px; font-weight:600; gap:5px; }
+        .lead-form input, .lead-form select { padding:11px 12px; border:1px solid rgba(0,0,0,.2); border-radius:8px; font:inherit; font-size:15px; background:#fff; color:#111; }
+        .lead-form .btn-primary { width:100%; border:0; cursor:pointer; font-size:16px; }
+        .lf-privacy { font-size:12px; opacity:.75; margin:4px 0 12px; }
+        .lf-status { margin-top:10px; font-weight:600; }
+        .lf-status.err { color:#c0392b; }
+        .hp { position:absolute; left:-9999px; width:1px; height:1px; }
+        .lead-gate { border:2px solid var(--teal-deep, #0a7a5c); border-radius:14px; padding:22px; margin:18px 0; }
+        .lead-gate h3 { margin-bottom:6px; }
+        #report.locked .gated-part { filter: blur(6px); pointer-events:none; user-select:none; }
+        .proof-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px; max-width:900px; margin:0 auto; }
+        .proof-card { border:1px solid rgba(0,0,0,.12); border-radius:12px; padding:18px; text-align:center; }
+        .proof-card b { display:block; font-size:30px; font-family:var(--font-display); color:var(--teal-deep,#0a7a5c); }
+        .proof-card span { font-size:14px; }
     </style>
     <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -1292,9 +1309,9 @@
                 <a href="#real-audit">Real audit</a>
                 <a href="#demo">Demo</a>
                 <a href="#how-it-works">How it works</a>
-                <a href="#pricing">Pricing</a>
+                <a href="#dfy">Done-for-you audit</a>
                 <a href="/blog.html">Blog</a>
-                <a href="#tool" class="nav-cta">Run my free audit</a>
+                <a href="#book" class="nav-cta">Book a 10-min walkthrough</a>
             </div>
         </div>
         <div id="nav-signed-in" class="user-bar" style="display:none">
@@ -1307,20 +1324,20 @@
     <!-- HERO -->
     <section class="hero">
         <div>
-            <p class="hero-eyebrow">For business owners who pay for ads</p>
-            <h1>Every month you pay for ads. <em>Find out what you bought.</em></h1>
-            <p class="hero-sub">Upload your agency's invoice and your Google or Meta ads report. Sixty seconds later, Unspun hands you the one number that matters — what a new customer actually costs you. In plain English.</p>
+            <p class="hero-eyebrow">Paying an agency or Google/Meta every month?</p>
+            <h1>Find out what a new customer really costs you <em>in 60 seconds, free.</em></h1>
+            <p class="hero-sub">Overpaying? Unhappy with your agency? Get the one number their report leaves out: your true cost per new customer, with their fee added back in. Upload your invoice and ad report, or just give us your website and monthly spend and we&rsquo;ll run the audit for you.</p>
             <div class="hero-actions">
-                <a href="#tool" class="btn-primary" id="hero-cta">Run my free audit</a>
-                <a href="#demo" class="btn-ghost">▶&nbsp; Watch a real audit</a>
+                <a href="#dfy" class="btn-primary" id="hero-cta">No files? We&rsquo;ll do it for you</a>
+                <a href="#tool" class="btn-ghost">Upload my reports</a>
             </div>
-            <p class="hero-trust"><span>First audit free</span><span>No sign-in required</span><span>Files never leave your browser</span></p>
+            <p class="hero-trust"><span>100% free audit</span><span>No sign-in, no card</span><span>Files never leave your browser</span></p>
         </div>
         <div class="receipt-wrap">
             <div class="receipt" aria-label="Sample audit receipt based on a real business">
                 <div class="receipt-head">
                     <div class="rc-title">UNSPUN AUDIT</div>
-                    <div class="rc-sub">MindBody Med · Seattle, WA · 1 month</div>
+                    <div class="rc-sub">A Seattle wellness clinic · 1 month</div>
                 </div>
                 <div class="rc-row"><span>Agency management fee</span><span class="rc-val">$1,408.00</span></div>
                 <div class="rc-row"><span>Google Ads spend</span><span class="rc-val">$2,123.25</span></div>
@@ -1339,12 +1356,35 @@
         </div>
     </section>
 
+    <!-- DONE-FOR-YOU AUDIT (Agent Rise entry path b) -->
+    <section class="section lead-sec" id="dfy">
+        <p class="section-label">No files? No problem.</p>
+        <h2>Just send your website + monthly spend. <em>We&rsquo;ll do your audit for you.</em></h2>
+        <p class="section-intro" style="margin:0 auto 24px;">A real person at HapaWire reviews your ads, Google presence and agency setup, then sends you a short recorded walkthrough of what we found, usually within 1 business day. Free. No obligation.</p>
+        <form class="lead-form" data-kind="dfy_audit">
+            <div class="lf-grid">
+              <label>Your name*<input name="name" required autocomplete="name"></label>
+              <label>Business name*<input name="business" required autocomplete="organization"></label>
+              <label>Email*<input name="email" type="email" required autocomplete="email"></label>
+              <label>Phone*<input name="phone" type="tel" required autocomplete="tel" placeholder="(206) 555-0123"></label>
+              <label>Website<input name="website" placeholder="yourbusiness.com" required></label>
+              <label>Monthly ad + agency spend*<select name="spend_band" required><option value="">Choose…</option><option>Under $1k</option><option>$1k–$3k</option><option>$3k–$7k</option><option>$7k–$15k</option><option>$15k+</option></select></label>
+              <label>Do you use an agency now?*<select name="has_agency" required><option value="">Choose…</option><option>Yes</option><option>No</option><option>Freelancer / in-house</option></select></label>
+              <input name="company_fax" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+            </div>
+            <p class="lf-privacy">We use this only to send your audit and follow up about it. Never sold or shared. Your uploaded files still never leave your browser. <a href="/privacy.html">Privacy</a></p>
+            <button class="btn-primary" type="submit">Get my free done-for-you audit</button>
+            <p class="lf-status" role="status"></p>
+        </form>
+    </section>
+
+
     <!-- REAL AUDIT CASE STUDY -->
     <section class="section" id="real-audit">
         <p class="section-label">A real audit</p>
         <h2>Their agency's report said <em>everything was fine.</em></h2>
-        <p class="section-intro">MindBody Med, a Seattle wellness clinic doing about $1.3M a year, was paying its agency every month — and had no idea whether any of it worked. This is what their monthly report looked like, and what Unspun found in it.</p>
-        <div class="case-attribution">Real client data · MindBody Med, Seattle · Google Ads · one month · shared with permission</div>
+        <p class="section-intro">A Seattle wellness clinic doing about $1.3M a year was paying its agency every month — and had no idea whether any of it worked. This is what their monthly report looked like, and what Unspun found in it.</p>
+        <div class="case-attribution">Real client data · a Seattle wellness clinic (anonymized) · Google Ads · one month · shared with permission</div>
 
         <div class="case-grid">
             <div class="case-panel case-before">
@@ -1400,7 +1440,7 @@
         <figure class="testimonial">
             <blockquote>When the Hapawire team shared their findings and walked me through what it all meant, I was shocked and in disbelief. One, the lost investment — but really, the honesty with which they presented the data. Just cut and dry. So thankful for the Unspun audit tool and happy to watch its continued growth.</blockquote>
             <figcaption class="testimonial-attr">
-                <strong>John</strong> · Owner, MindBody Med, Seattle
+                <strong>Clinic owner</strong> · a Seattle wellness clinic
                 <span class="verified">Verified client</span>
             </figcaption>
         </figure>
@@ -1410,7 +1450,7 @@
     <section class="section" id="demo">
         <p class="section-label">Watch it work</p>
         <h2>The whole audit, <em>start to finish.</em></h2>
-        <p class="section-intro">This is the exact flow, running on MindBody Med's real numbers. Press play — or click any chapter to jump around.</p>
+        <p class="section-intro">This is the exact flow, running on a Seattle wellness clinic's real numbers. Press play — or click any chapter to jump around.</p>
 
         <div class="player">
             <div class="player-chrome">
@@ -1479,7 +1519,7 @@
                     <div class="dp-endcard">
                         <p class="dp-kicker">That's it</p>
                         <h3>Your turn. Same 60 seconds.</h3>
-                        <p>First audit free · no card · your files never leave your browser</p>
+                        <p>Free · no card · your files never leave your browser</p>
                         <a href="#tool" class="btn-primary">Run my free audit</a>
                     </div>
                 </div>
@@ -1586,13 +1626,9 @@
         <!-- Shown when audits run out: signed-in with 0 credits, or anonymous
              visitor whose one free audit is used. Copy works for both. -->
         <div class="no-credits-gate" id="no-credits-gate" style="display:none">
-            <h3>That was your free audit</h3>
-            <p>Go Pro for unlimited audits, saved history, and month-over-month comparison — cancel anytime.</p>
-            <div class="gate-pack-row">
-                <a href="https://buy.stripe.com/bJe8wOemQ1Kvd02cp5aEE04" class="primary" style="display:inline-block; text-align:center; text-decoration:none; width:auto; padding:13px 22px;">Go Pro — $79/mo</a>
-                <a href="https://buy.stripe.com/6oUeVc1A41Kv7FIexdaEE05" class="primary" style="display:inline-block; text-align:center; text-decoration:none; width:auto; padding:13px 22px; opacity:0.85;">Annual — $790/yr</a>
-            </div>
-            <p style="font-size:13px; color:var(--ink-soft); margin-top:12px;">Already subscribed on another device? Sign in and your unlimited access follows you.</p>
+            <h3>Want a human to read your numbers?</h3>
+            <p>Book a free 10-minute walkthrough and we&rsquo;ll show you exactly where the money is leaking.</p>
+            <p><a class="btn-primary" href="#book">Book a 10-min walkthrough</a></p>
         </div>
 
         <div id="report" style="display:none">
@@ -1601,8 +1637,26 @@
                 <strong>This is a sample audit</strong> — example numbers from a typical small business running Google Ads through an agency. <a href="#tool" onclick="exitDemo()">Run yours instead — it's free, no sign-in needed.</a>
             </div>
 
-            <div class="demo-banner" id="anon-save-banner" style="display:none">
-                <strong>That's your real number.</strong> This audit was on us. Want to keep it, run one every month, and see the trend? Unspun Pro is $79/mo — or save this report to your email first.
+            <div class="lead-gate" id="lead-gate" style="display:none">
+                <h3>Your verdict is below. Unlock the full report + PDF</h3>
+                <p>Tell us where to send it. We&rsquo;ll also flag the 2&ndash;3 biggest leaks we see, free.</p>
+                <form class="lead-form" data-kind="report_unlock"><div class="lf-grid">
+              <label>Your name*<input name="name" required autocomplete="name"></label>
+              <label>Business name*<input name="business" required autocomplete="organization"></label>
+              <label>Email*<input name="email" type="email" required autocomplete="email"></label>
+              <label>Phone*<input name="phone" type="tel" required autocomplete="tel" placeholder="(206) 555-0123"></label>
+              <label>Website<input name="website" placeholder="yourbusiness.com" ></label>
+              <label>Monthly ad + agency spend*<select name="spend_band" required><option value="">Choose…</option><option>Under $1k</option><option>$1k–$3k</option><option>$3k–$7k</option><option>$7k–$15k</option><option>$15k+</option></select></label>
+              <label>Do you use an agency now?*<select name="has_agency" required><option value="">Choose…</option><option>Yes</option><option>No</option><option>Freelancer / in-house</option></select></label>
+              <input name="company_fax" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+            </div>
+            <p class="lf-privacy">We use this only to send your audit and follow up about it. Never sold or shared. Your uploaded files still never leave your browser. <a href="/privacy.html">Privacy</a></p>
+                    <button class="btn-primary" type="submit">Unlock my full report</button>
+                    <p class="lf-status" role="status"></p>
+                </form>
+            </div>
+            <div class="demo-banner" id="anon-save-banner" style="display:none !important">
+                <strong>That's your real number.</strong> This audit was on us. Want to keep it, run one every month, and see the trend? Book a 10-min walkthrough, or save this report to your email first.
                 <div class="save-actions" style="margin-top:12px;">
                     <button class="btn-ghost" type="button" onclick="revealSave()">Save &amp; email me this report</button>
                 </div>
@@ -1619,19 +1673,19 @@
                  files (or couldn't), so the numbers feel trustworthy, not magic. -->
             <div id="parse-summary" style="display:none"></div>
 
-            <div class="report-actions">
+            <div class="report-actions gated-part">
                 <button class="pdf-btn" onclick="downloadPDF()" aria-label="Download this audit as a PDF report">⬇&nbsp; Download PDF report</button>
                 <button onclick="window.print()" aria-label="Print this audit">🖨&nbsp; Print</button>
             </div>
 
-            <div class="box">
+            <div class="box gated-part">
                 <h2>Your Marketing Spend Breakdown</h2>
                 <p><strong>Agency Fee</strong>: $<span id="r-agency-fee">—</span></p>
                 <p><strong>Actual <span id="lbl-platform-1">Google</span> Ad Spend</strong>: $<span id="r-ad-spend">—</span></p>
                 <p><strong style="color:var(--red)">Total Cost This Month</strong><span class="tip" tabindex="0" role="note" aria-label="Everything you paid this month — your agency's fee plus the actual ad spend." data-tip="Everything you paid this month — your agency's fee plus the actual ad spend.">i</span>: <span class="highlight">$<span id="r-total">—</span></span></p>
             </div>
 
-            <div class="box">
+            <div class="box gated-part">
                 <h2>What You Got This Month</h2>
                 <p><strong>Impressions</strong>: <span id="r-impressions">—</span> → Your ad was shown that many times on <span id="lbl-platform-2">Google</span></p>
                 <p><strong>Clicks</strong>: <span id="r-clicks">—</span> at <strong>$<span id="r-cpc">—</span></strong> each = <strong>$<span id="r-ad-spend-2">—</span></strong> total ad spend</p>
@@ -1655,11 +1709,11 @@
                      so the profit/loss figure never feels like a black box. -->
                 <div id="pl-math" class="pl-math" style="display:none"></div>
                 <div id="loss-cta" style="display:none; margin-top:14px; padding:14px 16px; background:rgba(255,123,107,0.08); border:1px solid rgba(255,123,107,0.4); border-radius:10px; font-size:14px; line-height:1.6;">
-                    <strong style="color:var(--text)">Found a problem? That's what this audit is for.</strong> The team behind Unspun helps owners fix exactly this — <a href="mailto:human@hapawire.com?subject=My%20Unspun%20audit%20found%20a%20problem" style="color:var(--teal); font-weight:600;">email them your audit</a> and get a straight answer.
+                    <strong style="color:var(--text)">Found a problem? That's what this audit is for.</strong> The team behind Unspun helps owners fix exactly this — <a href="#book" data-x="mailto:human@hapawire.com?subject=My%20Unspun%20audit%20found%20a%20problem" style="color:var(--teal); font-weight:600;">email them your audit</a> and get a straight answer.
                 </div>
             </div>
 
-            <div class="box">
+            <div class="box gated-part">
                 <h2>Simple Terms Explained</h2>
                 <table>
                     <tr><th class="term">Term</th><th>Simple Meaning</th></tr>
@@ -1682,13 +1736,13 @@
                 <h2>What now?</h2>
                 <p class="next-lead">You've got the real number. Here's what people usually do next:</p>
                 <div class="next-actions">
-                    <a class="next-card" href="mailto:human@hapawire.com?subject=My%20Unspun%20audit&amp;body=I%20ran%20an%20audit%20on%20Unspun%20and%20want%20a%20straight%20read%20on%20what%20it%20means.">
-                        <strong>Talk to a human about this →</strong>
+                    <a class="next-card" href="#book">
+                        <strong>Book a 10-min walkthrough →</strong>
                         <span>Get a plain-English read on your numbers and what to ask your agency. No pitch.</span>
                     </a>
-                    <a class="next-card" href="#pricing" id="next-pricing">
-                        <strong>Track it month over month →</strong>
-                        <span>Unspun Pro is $79/mo for unlimited audits and saved history. Spot the trend before it costs you.</span>
+                    <a class="next-card" href="#fix-plan" id="next-pricing">
+                        <strong>Get it fixed: the Fix-Plan Sprint →</strong>
+                        <span>Two weeks, a dollar-ranked fix plan, quick wins done for you. Guaranteed.</span>
                     </a>
                 </div>
             </div>
@@ -1702,54 +1756,57 @@
     </section>
 
 
-    <!-- PRICING -->
-    <section class="section" id="pricing">
-        <p class="section-label">Pricing</p>
-        <h2>One plan. <em>Unlimited audits.</em></h2>
-        <p class="section-intro" style="margin: 0 auto;">Your first audit is free — no sign-in, no card. Go Pro to audit every month, keep your history, and catch the moment your numbers turn.</p>
-        <p class="section-intro" id="referral-banner" style="display:none; margin: 12px auto 0; font-weight: 600; color: var(--teal-deep);">You were referred — enter code <strong>REF5</strong> at checkout for $5 off your first month.</p>
-        <div class="pricing-grid">
-            <div class="pricing-card featured">
-                <div class="pricing-badge">Unspun Pro</div>
-                <div class="price"><sup>$</sup>79<span style="font-size:18px; color:var(--ink-soft);">/mo</span></div>
-                <div class="price-desc">Unlimited audits · cancel anytime</div>
-                <ul class="pricing-features">
-                    <li>Unlimited audits, every month</li>
-                    <li>Google Ads &amp; Meta Ads · PDF or CSV</li>
-                    <li>Saved history &amp; month-over-month comparison</li>
-                    <li>Profit / loss verdict + plain-English glossary</li>
-                    <li>Multiple locations, one account</li>
-                </ul>
-                <a data-plan="monthly" href="https://buy.stripe.com/bJe8wOemQ1Kvd02cp5aEE04" class="primary">Go Pro — $79/mo</a>
-            </div>
-            <div class="pricing-card">
-                <div class="pricing-badge" style="background:var(--ink-soft);">Annual</div>
-                <div class="price"><sup>$</sup>790<span style="font-size:18px; color:var(--ink-soft);">/yr</span></div>
-                <div class="price-desc">2 months free vs. monthly</div>
-                <ul class="pricing-features">
-                    <li>Everything in Pro</li>
-                    <li>One invoice for the year</li>
-                    <li>Locks your rate</li>
-                </ul>
-                <a data-plan="yearly" href="https://buy.stripe.com/6oUeVc1A41Kv7FIexdaEE05" class="primary">Go annual — $790/yr</a>
-            </div>
+    <!-- PROOF -->
+    <section class="section" id="proof">
+        <p class="section-label">What happens after the audit</p>
+        <h2>A Seattle wellness clinic found the leak. <em>Then we fixed it.</em></h2>
+        <p class="section-intro" style="margin:0 auto 28px;">Their agency&rsquo;s report showed $106 per conversion. The audit showed $176.56 against a $149 patient: losing money on every one. After HapaWire took over search and AI visibility:</p>
+        <div class="proof-grid">
+            <div class="proof-card"><b>+37%</b><span>new patients per week (11.9 → 16.3)</span></div>
+            <div class="proof-card"><b>0 → 10+</b><span>page-1 Google rankings in month one</span></div>
+            <div class="proof-card"><b>5.2×</b><span>more search appearances</span></div>
+            <div class="proof-card"><b>1,206</b><span>booking actions since Aug 20</span></div>
         </div>
-        <p class="pricing-note">First audit is always free. No card required.</p>
     </section>
 
-    <!-- REFERRAL -->
-    <section class="section" id="referral">
-        <p class="section-label">Referral program</p>
-        <h2>Know another owner <em>in the dark?</em></h2>
-        <p class="section-intro" style="margin: 0 auto 32px;">Send them your referral link. When they go Pro, you get <strong style="color:var(--teal-deep)">$10 credit</strong> toward your next month. They get <strong style="color:var(--teal-deep)">$5 off</strong> their first.</p>
-        <a class="btn-primary" style="display:inline-block; max-width:330px;" href="mailto:support@unspun.report?subject=Set%20up%20my%20referral%20link&body=Please%20set%20up%20my%20Unspun%20referral%20link.%20My%20account%20email%20is%3A%20">Get my referral link</a>
-        <p style="font-size:13px; color:var(--ink-soft); margin-top:12px;">We set referral links up personally right now — one email, usually same-day.</p>
+    <!-- FIX-PLAN SPRINT (vault: Offer Ladder rung 2) -->
+    <section class="section" id="fix-plan">
+        <p class="section-label">If the audit finds a leak</p>
+        <h2>The Fix-Plan Sprint: <em>stop paying for ads that lose money.</em></h2>
+        <p class="section-intro" style="margin:0 auto 20px;">Two weeks, done with you. A line-by-line teardown, a fix plan ranked by dollars, and 2&ndash;3 quick wins implemented during the sprint. If it doesn&rsquo;t surface at least $997 in recoverable or misreported spend, you don&rsquo;t pay. Credits in full toward ongoing management if you want us to run it.</p>
+        <p style="text-align:center"><a class="btn-primary" href="#book" style="display:inline-block;max-width:330px">Talk about a Sprint</a></p>
+    </section>
+
+    <!-- BOOK -->
+    <section class="section lead-sec" id="book">
+        <p class="section-label">Book a 10-min walkthrough</p>
+        <h2>Ten minutes. <em>Your numbers, explained.</em></h2>
+        <p class="section-intro" style="margin:0 auto 20px;">Pick a time on the calendar, or give us two times that work and we&rsquo;ll confirm by text. No pitch unless you ask for one.</p>
+        <p style="text-align:center;margin-bottom:22px"><a class="btn-primary" id="cal-link" href="https://calendar.app.google/dHgmiubiV6fdhcjc9" target="_blank" rel="noopener" style="display:inline-block;max-width:330px">Pick a time on the calendar →</a></p>
+        <form class="lead-form" data-kind="booking"><div class="lf-grid">
+              <label>Your name*<input name="name" required autocomplete="name"></label>
+              <label>Business name*<input name="business" required autocomplete="organization"></label>
+              <label>Email*<input name="email" type="email" required autocomplete="email"></label>
+              <label>Phone*<input name="phone" type="tel" required autocomplete="tel" placeholder="(206) 555-0123"></label>
+              <label>Website<input name="website" placeholder="yourbusiness.com" ></label>
+              <label>Monthly ad + agency spend*<select name="spend_band" required><option value="">Choose…</option><option>Under $1k</option><option>$1k–$3k</option><option>$3k–$7k</option><option>$7k–$15k</option><option>$15k+</option></select></label>
+              <label>Do you use an agency now?*<select name="has_agency" required><option value="">Choose…</option><option>Yes</option><option>No</option><option>Freelancer / in-house</option></select></label>
+              <input name="company_fax" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+            </div>
+            <p class="lf-privacy">We use this only to send your audit and follow up about it. Never sold or shared. Your uploaded files still never leave your browser. <a href="/privacy.html">Privacy</a></p>
+            <div class="lf-grid">
+              <label>Time option 1*<input name="slot1" type="datetime-local" required></label>
+              <label>Time option 2*<input name="slot2" type="datetime-local" required></label>
+            </div>
+            <button class="btn-primary" type="submit">Request my walkthrough</button>
+            <p class="lf-status" role="status"></p>
+        </form>
     </section>
 
     <!-- FOOTER -->
     <footer>
         <p class="f-logo">unspun<span>.</span></p>
-        <p class="f-tag">Your money. Their jargon. Our translation.</p>
+        <p class="f-tag">Your money. Their jargon. Our translation. · Powered by <a href="https://hapawire.com">HapaWire</a>, Seattle</p>
         <p style="margin-top:18px;"><a href="mailto:support@unspun.report">support@unspun.report</a></p>
         <p class="f-fine">© 2026 Unspun. Your files are processed in your browser and never stored. &nbsp;·&nbsp; <a href="/privacy.html">Privacy Policy</a> &nbsp;·&nbsp; Powered by <a href="https://hapawire.com" target="_blank">Hapawire</a></p>
     </footer>
@@ -2207,11 +2264,11 @@
                 files: files.length,
                 types: [...new Set(files.map(f => (f.name.split('.').pop() || '').toLowerCase()))].join(',')
             });
-            if (currentUser && currentCredits === 0) { setStatus('No audits remaining. Go Pro to continue.', 'error'); return; }
+            if (false) { setStatus('No audits remaining. Book a walkthrough below.', 'error'); return; }
             // One real audit free for anonymous visitors — the value-first hook. The
             // second upload asks them to subscribe. localStorage is a soft gate by
             // design: the free tier is a marketing cost, not a security boundary.
-            if (!currentUser && localStorage.getItem('unspun_free_audit_used')) {
+            if (false) {
                 track('free_audit_gate_shown');
                 document.getElementById('tool-inner').style.display = 'none';
                 document.getElementById('no-credits-gate').style.display = 'block';
@@ -2556,6 +2613,7 @@ Total - all campaigns,52456,1124,2.14%,1.97,2217.41,34,65.22`;
         // crisp and the "files never leave your browser" promise holds. Falls back to
         // the browser print dialog if the library didn't load.
         function downloadPDF() {
+            if (!window.unspunUnlocked && document.getElementById('report').classList.contains('locked')) { document.getElementById('lead-gate').scrollIntoView({behavior:'smooth'}); return; }
             if (!window.jspdf || !window.jspdf.jsPDF) { track('pdf_fallback_print'); window.print(); return; }
             track('pdf_downloaded', { platform: data.platform || 'unknown', demo: !!demoActive });
             const { jsPDF } = window.jspdf;
@@ -2707,6 +2765,8 @@ Total - all campaigns,52456,1124,2.14%,1.97,2217.41,34,65.22`;
             // headline answer is visible without making the user hunt for a button.
             calculate();
             document.getElementById('report').style.display = 'block';
+            window._unspunAudit = { agencyFee: data.agencyFee, adSpend: data.adSpend, clicks: data.clicks, conversions: data.conversions, blended: window._blended };
+            if (window.unspunLock) window.unspunLock();
         }
 
         // Shows the user exactly which numbers we pulled from their files, with a
@@ -2836,5 +2896,42 @@ Total - all campaigns,52456,1124,2.14%,1.97,2217.41,34,65.22`;
         initAuth();
     </script>
 
+
+    <script>
+    (function () {
+      var U = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
+      var q = new URLSearchParams(location.search), st = {};
+      try { st = JSON.parse(localStorage.getItem('unspun_utm') || '{}'); } catch (e) {}
+      if (U.some(function (k) { return q.get(k); })) { st = {}; U.forEach(function (k) { if (q.get(k)) st[k] = q.get(k).slice(0,100); }); st.landing = location.pathname + location.search; st.referrer = document.referrer || ''; localStorage.setItem('unspun_utm', JSON.stringify(st)); }
+      if (!st.landing) { st.landing = location.pathname + location.search; st.referrer = document.referrer || ''; }
+      window.unspunUnlocked = localStorage.getItem('unspun_lead_ok') === '1';
+      window.unspunLock = function () { var r = document.getElementById('report'), g = document.getElementById('lead-gate'); if (!r) return;
+        var demo = document.getElementById('demo-banner'); var isDemo = demo && demo.style.display === 'block';
+        var lock = !window.unspunUnlocked && !isDemo; r.classList.toggle('locked', lock); if (g) g.style.display = lock ? 'block' : 'none'; };
+      // pull forward contact details across forms
+      function prefill(f) { try { var c = JSON.parse(localStorage.getItem('unspun_contact') || '{}'); Object.keys(c).forEach(function (k) { var el = f.elements[k]; if (el && !el.value) el.value = c[k]; }); } catch (e) {} }
+      document.querySelectorAll('form.lead-form').forEach(function (f) {
+        prefill(f);
+        f.addEventListener('submit', async function (ev) {
+          ev.preventDefault(); var s = f.querySelector('.lf-status'), btn = f.querySelector('button[type=submit]');
+          var body = { kind: f.dataset.kind }; new FormData(f).forEach(function (v, k) { body[k] = v; });
+          Object.assign(body, st);
+          if (f.dataset.kind === 'report_unlock' && window._unspunAudit) body.audit_json = JSON.stringify(window._unspunAudit);
+          btn.disabled = true; s.className = 'lf-status'; s.textContent = 'Sending…';
+          try {
+            var r = await fetch('/api/lead', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+            var j = await r.json(); if (!r.ok || !j.ok) throw new Error(j.error || 'Something went wrong');
+            var c = {}; ['name','business','email','phone','website','spend_band','has_agency'].forEach(function (k) { if (body[k]) c[k] = body[k]; });
+            localStorage.setItem('unspun_contact', JSON.stringify(c));
+            if (window.gtag) gtag('event', 'generate_lead', { kind: body.kind });
+            if (f.dataset.kind === 'report_unlock') { localStorage.setItem('unspun_lead_ok', '1'); window.unspunUnlocked = true; window.unspunLock();
+              s.textContent = 'Unlocked. Scroll down for your full report and PDF.';
+              document.querySelectorAll('#book form.lead-form').forEach(prefill); return; }
+            location.href = '/thank-you.html?k=' + encodeURIComponent(body.kind);
+          } catch (e) { s.className = 'lf-status err'; s.textContent = e.message + ' Or email human@hapawire.com.'; btn.disabled = false; }
+        });
+      });
+    })();
+    </script>
 </body>
 </html>
