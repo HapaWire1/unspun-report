@@ -6,3 +6,4 @@ sql
 scripts
 *.md
 .claude
+lead-worker

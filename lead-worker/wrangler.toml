@@ -1,0 +1,18 @@
+name = "unspun-preview"
+main = "worker.js"
+compatibility_date = "2024-09-23"
+account_id = "7e504f7b1e19893acdbcb0b9bb122b4c"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+html_handling = "auto-trailing-slash"
+not_found_handling = "404-page"
+
+[vars]
+NOTIFY_TO = "tyler@hapawire.com"
+NOTIFY_FROM = "Unspun Leads <leads@doppelpod.io>"
+
+[[kv_namespaces]]
+binding = "LEADS"
+id = "4a7f726b74254e83a52e69a0c725237d"
