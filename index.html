@@ -2022,7 +2022,7 @@
             // "Run my free audit" is first-visit copy — once signed in, credits may be
             // paid, so stop claiming they're free.
             const heroCta = document.getElementById('hero-cta');
-            if (heroCta) heroCta.textContent = 'Run an audit';
+            // hero CTA is the DFY path now
             document.getElementById('nav-email').textContent = user.email;
             updateCreditDisplays();
             document.getElementById('nav-signed-out').style.display = 'none';
@@ -2170,7 +2170,7 @@
             document.getElementById('no-credits-gate').style.display = 'none';
             document.getElementById('past-audits').style.display = 'none';
             const heroCta = document.getElementById('hero-cta');
-            if (heroCta) heroCta.textContent = 'Run my free audit';
+            // hero CTA is the DFY path now
             const toolLabel = document.getElementById('tool-label');
             if (toolLabel) toolLabel.textContent = 'Free audit';
         }
