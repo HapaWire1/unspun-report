@@ -1781,8 +1781,10 @@
     <section class="section lead-sec" id="book">
         <p class="section-label">Book a 10-min walkthrough</p>
         <h2>Ten minutes. <em>Your numbers, explained.</em></h2>
-        <p class="section-intro" style="margin:0 auto 20px;">Pick a time on the calendar, or give us two times that work and we&rsquo;ll confirm by text. No pitch unless you ask for one.</p>
-        <p style="text-align:center;margin-bottom:22px"><a class="btn-primary" id="cal-link" href="https://calendar.app.google/dHgmiubiV6fdhcjc9" target="_blank" rel="noopener" style="display:inline-block;max-width:330px">Pick a time on the calendar →</a></p>
+        <p class="section-intro" style="margin:0 auto 20px;">Pick any open time below. You get a calendar invite and a reminder automatically. No pitch unless you ask for one.</p>
+        <div style="max-width:860px;margin:0 auto 22px"><iframe src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ3tLx4EM-kNo1ezciN3Sx8QqiH5_NVFspbRqqdECt6B3k-vdMZy8wb5b3fiD3joo4ua5Xamb902?gv=true" title="Book a 10-minute walkthrough" style="border:0;width:100%;height:640px;background:#fff;border-radius:12px" loading="lazy"></iframe></div>
+        <p style="text-align:center;font-size:14px;margin-bottom:14px">None of these work? Send two times below and we&rsquo;ll confirm by email.</p>
+        <p style="display:none"><a id="cal-link" href="https://calendar.app.google/dHgmiubiV6fdhcjc9" target="_blank" rel="noopener" style="display:inline-block;max-width:330px">Pick a time on the calendar →</a></p>
         <form class="lead-form" data-kind="booking"><div class="lf-grid">
               <label>Your name*<input name="name" required autocomplete="name"></label>
               <label>Business name*<input name="business" required autocomplete="organization"></label>
@@ -2907,7 +2909,7 @@ Total - all campaigns,52456,1124,2.14%,1.97,2217.41,34,65.22`;
       window.unspunUnlocked = localStorage.getItem('unspun_lead_ok') === '1';
       window.unspunLock = function () { var r = document.getElementById('report'), g = document.getElementById('lead-gate'); if (!r) return;
         var demo = document.getElementById('demo-banner'); var isDemo = demo && demo.style.display === 'block';
-        var lock = !window.unspunUnlocked && !isDemo; r.classList.toggle('locked', lock); if (g) g.style.display = lock ? 'block' : 'none'; };
+        var lock = !window.unspunUnlocked && !isDemo; r.classList.toggle('locked', lock); if (g && lock) g.style.display = 'block'; };
       // pull forward contact details across forms
       function prefill(f) { try { var c = JSON.parse(localStorage.getItem('unspun_contact') || '{}'); Object.keys(c).forEach(function (k) { var el = f.elements[k]; if (el && !el.value) el.value = c[k]; }); } catch (e) {} }
       document.querySelectorAll('form.lead-form').forEach(function (f) {
@@ -2926,9 +2928,10 @@ Total - all campaigns,52456,1124,2.14%,1.97,2217.41,34,65.22`;
             localStorage.setItem('unspun_contact', JSON.stringify(c));
             if (window.gtag) gtag('event', 'generate_lead', { kind: body.kind });
             if (f.dataset.kind === 'report_unlock') { localStorage.setItem('unspun_lead_ok', '1'); window.unspunUnlocked = true; window.unspunLock();
-              s.textContent = 'Unlocked. Scroll down for your full report and PDF.';
+              s.textContent = '';
+              var g = document.getElementById('lead-gate'); g.style.display = 'block'; g.innerHTML = '<h3>Unlocked. Your full report + PDF are right below.</h3><p>Want us to walk you through it and show where the money is leaking? Grab any open 10-minute slot:</p><iframe src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ3tLx4EM-kNo1ezciN3Sx8QqiH5_NVFspbRqqdECt6B3k-vdMZy8wb5b3fiD3joo4ua5Xamb902?gv=true" title="Book a 10-minute walkthrough" style="border:0;width:100%;height:640px;background:#fff;border-radius:12px" loading="lazy"></iframe>'; g.scrollIntoView({behavior:'smooth'});
               document.querySelectorAll('#book form.lead-form').forEach(prefill); return; }
-            location.href = '/thank-you.html?k=' + encodeURIComponent(body.kind);
+            location.href = '/thank-you.html?k=' + encodeURIComponent(body.kind) + (body.kind === 'booking' ? '' : '#book');
           } catch (e) { s.className = 'lf-status err'; s.textContent = e.message + ' Or email human@hapawire.com.'; btn.disabled = false; }
         });
       });

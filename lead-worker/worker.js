@@ -37,7 +37,7 @@ async function lead(req, env) {
     const tel = r.phone.replace(/[^\d+]/g, '');
     const html = `<h2 style="margin:0">🔥 Unspun lead #${id}: ${esc(label)}</h2>
 <p><b>${esc(r.name)}</b> · ${esc(r.business || '')} · spend ${esc(r.spend_band || '?')} · agency: ${esc(r.has_agency || '?')}</p>
-<p><a href="tel:${tel}">📞 Call ${esc(r.phone)} now</a> (Agent Rise: call within 5 min) · <a href="mailto:${esc(r.email)}">${esc(r.email)}</a></p>
+<p>Visitor was sent straight to your booking calendar. Watch for a Google Calendar booking. ${r.kind === "dfy_audit" ? "<b>To do: record the Loom snapshot (promised within 1 business day).</b> " : ""}${r.kind === "booking" ? "<b>To do: they asked for these times, confirm one by email.</b> " : ""}Contact: <a href="mailto:${esc(r.email)}">${esc(r.email)}</a> · ${esc(r.phone)}</p>
 <table style="font:13px sans-serif">${rows}</table>`;
     const resp = await fetch('https://api.resend.com/emails', {
       method: 'POST', headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, 'content-type': 'application/json' },
