@@ -1311,7 +1311,7 @@
                 <a href="#how-it-works">How it works</a>
                 <a href="#dfy">Done-for-you audit</a>
                 <a href="/blog.html">Blog</a>
-                <a href="#book" class="nav-cta">Book a 10-min walkthrough</a>
+                <a href="#book" class="nav-cta">Book a 20-min walkthrough</a>
             </div>
         </div>
         <div id="nav-signed-in" class="user-bar" style="display:none">
@@ -1627,8 +1627,8 @@
              visitor whose one free audit is used. Copy works for both. -->
         <div class="no-credits-gate" id="no-credits-gate" style="display:none">
             <h3>Want a human to read your numbers?</h3>
-            <p>Book a free 10-minute walkthrough and we&rsquo;ll show you exactly where the money is leaking.</p>
-            <p><a class="btn-primary" href="#book">Book a 10-min walkthrough</a></p>
+            <p>Book a free 20-minute walkthrough and we&rsquo;ll show you exactly where the money is leaking.</p>
+            <p><a class="btn-primary" href="#book">Book a 20-min walkthrough</a></p>
         </div>
 
         <div id="report" style="display:none">
@@ -1656,7 +1656,7 @@
                 </form>
             </div>
             <div class="demo-banner" id="anon-save-banner" style="display:none !important">
-                <strong>That's your real number.</strong> This audit was on us. Want to keep it, run one every month, and see the trend? Book a 10-min walkthrough, or save this report to your email first.
+                <strong>That's your real number.</strong> This audit was on us. Want to keep it, run one every month, and see the trend? Book a 20-min walkthrough, or save this report to your email first.
                 <div class="save-actions" style="margin-top:12px;">
                     <button class="btn-ghost" type="button" onclick="revealSave()">Save &amp; email me this report</button>
                 </div>
@@ -1737,7 +1737,7 @@
                 <p class="next-lead">You've got the real number. Here's what people usually do next:</p>
                 <div class="next-actions">
                     <a class="next-card" href="#book">
-                        <strong>Book a 10-min walkthrough →</strong>
+                        <strong>Book a 20-min walkthrough →</strong>
                         <span>Get a plain-English read on your numbers and what to ask your agency. No pitch.</span>
                     </a>
                     <a class="next-card" href="#fix-plan" id="next-pricing">
@@ -1779,10 +1779,10 @@
 
     <!-- BOOK -->
     <section class="section lead-sec" id="book">
-        <p class="section-label">Book a 10-min walkthrough</p>
-        <h2>Ten minutes. <em>Your numbers, explained.</em></h2>
+        <p class="section-label">Book a 20-min walkthrough</p>
+        <h2>Twenty minutes. <em>Your numbers, explained.</em></h2>
         <p class="section-intro" style="margin:0 auto 20px;">Pick any open time below. You get a calendar invite and a reminder automatically. No pitch unless you ask for one.</p>
-        <div style="max-width:860px;margin:0 auto 22px"><iframe src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ3tLx4EM-kNo1ezciN3Sx8QqiH5_NVFspbRqqdECt6B3k-vdMZy8wb5b3fiD3joo4ua5Xamb902?gv=true" title="Book a 10-minute walkthrough" style="border:0;width:100%;height:640px;background:#fff;border-radius:12px" loading="lazy"></iframe></div>
+        <div style="max-width:860px;margin:0 auto 22px"><iframe src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ3tLx4EM-kNo1ezciN3Sx8QqiH5_NVFspbRqqdECt6B3k-vdMZy8wb5b3fiD3joo4ua5Xamb902?gv=true" title="Book a 20-minute walkthrough" style="border:0;width:100%;height:640px;background:#fff;border-radius:12px" loading="lazy"></iframe></div>
         <p style="text-align:center;font-size:14px;margin-bottom:14px">None of these work? Send two times below and we&rsquo;ll confirm by email.</p>
         <p style="display:none"><a id="cal-link" href="https://calendar.app.google/dHgmiubiV6fdhcjc9" target="_blank" rel="noopener" style="display:inline-block;max-width:330px">Pick a time on the calendar →</a></p>
         <form class="lead-form" data-kind="booking"><div class="lf-grid">
@@ -2929,7 +2929,7 @@ Total - all campaigns,52456,1124,2.14%,1.97,2217.41,34,65.22`;
             if (window.gtag) gtag('event', 'generate_lead', { kind: body.kind });
             if (f.dataset.kind === 'report_unlock') { localStorage.setItem('unspun_lead_ok', '1'); window.unspunUnlocked = true; window.unspunLock();
               s.textContent = '';
-              var g = document.getElementById('lead-gate'); g.style.display = 'block'; g.innerHTML = '<h3>Unlocked. Your full report + PDF are right below.</h3><p>Want us to walk you through it and show where the money is leaking? Grab any open 10-minute slot:</p><iframe src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ3tLx4EM-kNo1ezciN3Sx8QqiH5_NVFspbRqqdECt6B3k-vdMZy8wb5b3fiD3joo4ua5Xamb902?gv=true" title="Book a 10-minute walkthrough" style="border:0;width:100%;height:640px;background:#fff;border-radius:12px" loading="lazy"></iframe>'; g.scrollIntoView({behavior:'smooth'});
+              var g = document.getElementById('lead-gate'); g.style.display = 'block'; g.innerHTML = '<h3>Unlocked. Your full report + PDF are right below.</h3><p>Want us to walk you through it and show where the money is leaking? Grab any open 20-minute slot:</p><iframe src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ3tLx4EM-kNo1ezciN3Sx8QqiH5_NVFspbRqqdECt6B3k-vdMZy8wb5b3fiD3joo4ua5Xamb902?gv=true" title="Book a 20-minute walkthrough" style="border:0;width:100%;height:640px;background:#fff;border-radius:12px" loading="lazy"></iframe>'; g.scrollIntoView({behavior:'smooth'});
               document.querySelectorAll('#book form.lead-form').forEach(prefill); return; }
             location.href = '/thank-you.html?k=' + encodeURIComponent(body.kind) + (body.kind === 'booking' ? '' : '#book');
           } catch (e) { s.className = 'lf-status err'; s.textContent = e.message + ' Or email human@hapawire.com.'; btn.disabled = false; }
